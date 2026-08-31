@@ -9,14 +9,14 @@ if (!fs.existsSync(path.join(root, 'package.json'))) root = process.cwd();
 if (!fs.existsSync(path.join(root, 'package.json'))) root = path.resolve(process.cwd(), '..');
 const read = (name) => fs.readFileSync(path.join(root, name), 'utf8');
 const pkg = JSON.parse(read('package.json'));
-const name = '@goodandready-private/dsh-shadow-auditor';
+const name = '@goodandready/dsh-shadow-auditor';
 
-test('private package identity matches all loader sites', () => {
+test('public package identity matches all loader sites', () => {
   assert.equal(pkg.name, name);
   assert.equal(pkg.private, undefined);
-  assert.equal(pkg.publishConfig.registry, 'https://npm.pkg.github.com');
-  assert.ok(read('cordis.patch.yml').includes("name: '@goodandready-private/dsh-shadow-auditor'"));
-  assert.ok(read('lib/client.js').includes("id: '@goodandready-private/dsh-shadow-auditor'"));
+  assert.ok(!pkg.publishConfig || pkg.publishConfig.registry !== 'https://npm.pkg.github.com', 'public should not use github packages');
+  assert.ok(read('cordis.patch.yml').includes("name: '@goodandready/dsh-shadow-auditor'"));
+  assert.ok(read('lib/client.js').includes("id: '@goodandready/dsh-shadow-auditor'"));
 });
 
 test('tracked package sources contain no host-specific infra references', () => {

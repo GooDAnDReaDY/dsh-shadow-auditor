@@ -112,6 +112,10 @@ dsh-shadow-auditor:
 
 ## 🔄 Version History
 
+### v0.1.4 (Settings Slot Registration Hotfix)
+* **Declaration-Aware Slot Injection (`settings.plugin.item`)**: Plugin card registration now uses `ctx.slots.inject`, eliminating loader crashes caused by registering before the host entry declares the slot (`slot is not declared`).
+* **Fallback Settings Section (`settings.section`)**: Added automatic fallback to a standalone settings section managed with a timer and disposed via `ctx.effect` if `settings.plugin.item` is unavailable.
+
 ### v0.1.3 (Security Hardening & Stability Hotfix)
 * **Compound Command Analysis (`findDangerous`)**: Chained command expressions (`&&`, `||`, `;`, newline continuations) are segmented and verified, preventing firewall bypasses via allowlisted prefixes (`systemctl status && rm -rf /`).
 * **Strict Key Allowlisting (`scanSecrets`)**: Eliminated false-positive allowlisting of real API tokens that happen to contain the word "example".

@@ -73,6 +73,10 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ## 🔄 版本记录
 
+### v0.1.4 (设置插槽注册热修复)
+* **声明感知的插槽注入 (`settings.plugin.item`)**: 设置卡片注册全面迁移至 `ctx.slots.inject`，彻底解决在父级插槽尚未声明时直接注册导致的加载器崩溃 (`slot is not declared`)。
+* **后备设置项 (`settings.section`)**: 在当前 DSH 构建缺少插件卡片插槽时，自动降级至独立设置分区，并通过 `ctx.effect` 安全管理生命周期。
+
 ### v0.1.3 (安全加固与稳定性修复)
 * **复合命令链式分析 (`findDangerous`)**: 解析 `&&`、`||`、`;` 和换行续行命令，杜绝利用白名单安全命令掩盖高危操作 (`systemctl status && rm -rf /`) 的绕过漏洞。
 * **精准密钥过滤 (`scanSecrets`)**: 修复包含 "example" 子串的真实有效密钥被误放行的问题。

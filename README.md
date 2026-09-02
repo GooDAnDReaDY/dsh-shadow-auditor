@@ -103,8 +103,23 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 dsh-shadow-auditor:
   strictSecretScanning: true    # Block execution if API keys or tokens are detected in diffs
   blockDangerousCommands: true  # Block destructive shell commands automatically
-  redactSecretsInLogs: true     # Replace detected secrets with [REDACTED] in audit logs
+  enableAuditBadge: true        # Display security shield badge in UI and approval dialogs
 ```
+
+---
+
+---
+
+## 🔄 Version History
+
+### v0.1.3 (Security Hardening & Stability Hotfix)
+* **Compound Command Analysis (`findDangerous`)**: Chained command expressions (`&&`, `||`, `;`, newline continuations) are segmented and verified, preventing firewall bypasses via allowlisted prefixes (`systemctl status && rm -rf /`).
+* **Strict Key Allowlisting (`scanSecrets`)**: Eliminated false-positive allowlisting of real API tokens that happen to contain the word "example".
+* **Automatic Secret Masking (`maskSecret`)**: Intercepted credentials and tokens are redacted (`sk-pr...****...1234`) before being sent via HTTP API or rendered in Web UI.
+* **Full-Length File Scanning**: Removed arbitrary 8 KB cutoff when scanning file edits/writes; all files of any size are thoroughly inspected.
+* **Cordis Lifecycle & Event Context**: Tool registrations are encapsulated in `ctx.effect` for clean hot-reload teardown; fixed context scoping for `approval/asked` listener.
+* **Web UI Performance & Stability**: Eliminated disruptive timer-based form draft resets, scoped `/audit` polling to expanded state, and added unmount guards.
+* **HTTP No-Store**: Added `Cache-Control: no-store` header to the `/dsh-shadow-auditor/audit` endpoint.
 
 ---
 

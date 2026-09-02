@@ -69,6 +69,21 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ---
 
+---
+
+## 🔄 版本记录
+
+### v0.1.3 (安全加固与稳定性修复)
+* **复合命令链式分析 (`findDangerous`)**: 解析 `&&`、`||`、`;` 和换行续行命令，杜绝利用白名单安全命令掩盖高危操作 (`systemctl status && rm -rf /`) 的绕过漏洞。
+* **精准密钥过滤 (`scanSecrets`)**: 修复包含 "example" 子串的真实有效密钥被误放行的问题。
+* **敏感凭据脱敏保护 (`maskSecret`)**: 拦截到的密钥在存入审计日志、HTTP API 返回及 Web UI 渲染前均执行脱敏 (`sk-pr...****...1234`)。
+* **文件全量扫描**: 移除文件写入/编辑时 8 KB 的扫描上限截断，完整检测任意体积的文件。
+* **Cordis 生命周期与上下文完善**: 工具注册统一交由 `ctx.effect` 管理，支持热重载注销；修复 `approval/asked` 事件上下文。
+* **Web UI 体验与内存泄漏优化**: 移除导致表单编辑冲突的定时重置逻辑，仅在面板展开时轮询审计接口，防止组件卸载时发生内存泄漏。
+* **API 缓存控制**: 为 `/dsh-shadow-auditor/audit` 路由显式增加 `Cache-Control: no-store` 标头。
+
+---
+
 ## 📄 开源协议
 
 MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)

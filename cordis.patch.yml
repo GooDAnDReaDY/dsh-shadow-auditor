@@ -1,2 +1,3 @@
-- id: dsh-shadow-auditor
-  name: '@goodandready/dsh-shadow-auditor'
+- insert:
+    - id: dsh-shadow-auditor
+      name: '@goodandready/dsh-shadow-auditor'

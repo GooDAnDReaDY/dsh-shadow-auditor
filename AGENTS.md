@@ -1,7 +1,7 @@
 # AGENTS.md for dsh-shadow-auditor
 
 ## Project Scope
-- Plugin: `@goodandready-private/dsh-shadow-auditor`
+- Plugin: `@goodandready/dsh-shadow-auditor`
 - Architecture: DeepSeek Harness Cordis plugin + Web client
 - Base Directory: `dhsplugins/dsh-shadow-auditor`
 

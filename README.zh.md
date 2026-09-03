@@ -73,6 +73,16 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ## 🔄 版本记录
 
+### v0.2.0 (全功能审计套件、风险评分与外发防护)
+* **DSH 聊天斜杠命令 `/audit`**: 在对话中直接生成详尽的运维风险账单 (Operation Bill)——汇总工具调用次数、风险评分 (0–100)、可疑调用明细表以及被拦截的危险指令。支持参数：`--turn` (仅限当轮)、`--all` (全量历史)、`--json`、`--since=YYYY-MM-DD`。
+* **持久化审计归档 `AuditRecorder`**: 将调用事件以 JSONL 格式保存在 `<DSH_HOME>/shadow-auditor/<yyyy-mm>.jsonl` 中，依托 Promise 写入队列消除并发竞争，单文件超过 50 MB 自动 `.gz` 压缩并保留 30 天。
+* **深层内核遥测钩子**: 全局监听 `tools/result` 获取工具真实执行结果 (`result.isError`) 与脱敏报错信息，并通过 `session/event` (`turn/end`) 精确切分交互轮次。
+* **凭据网络外发防御**: 拦截携带敏感凭据文件 (`.env`, `id_rsa`, `.git-credentials` 等) 的网络工具调用 (`curl`, `wget`, `scp`, `ssh`, `nc`, `socat`)。
+* **越界重定向防御**: 拦截指向工作区外部（如 `/etc/`, `~/.bashrc`, `%USERPROFILE%`, cron）的 shell 输出重定向 (`>` 与 `>>`)。
+* **智能 `git push --force`**: 严格锁定受保护分支 (`main`, `master`, `prod`) 及受控远端的强制推送，同时保留开发者本地特性分支的自由 rebase 能力。
+* **确定性风险评分 (0–100)**: 无需消耗大模型 token 的快速风险定级引擎，配备 10 分钟滑动窗口识别高频同类操作与连续高危行为。
+* **不动点递归脱敏**: `redactText` / `redactValue` 模块递归清理深层嵌套结构中的 token、密码及 `.env` 敏感赋值，直至数据完全收敛。
+
 ### v0.1.4 (设置插槽注册热修复)
 * **声明感知的插槽注入 (`settings.plugin.item`)**: 设置卡片注册全面迁移至 `ctx.slots.inject`，彻底解决在父级插槽尚未声明时直接注册导致的加载器崩溃 (`slot is not declared`)。
 * **后备设置项 (`settings.section`)**: 在当前 DSH 构建缺少插件卡片插槽时，自动降级至独立设置分区，并通过 `ctx.effect` 安全管理生命周期。

@@ -112,6 +112,16 @@ dsh-shadow-auditor:
 
 ## 🔄 Version History
 
+### v0.2.0 (Audit Suite, Risk Scoring & Exfiltration Protection)
+* **Chat Slash Command `/audit`**: Generates a detailed Operation Bill directly in the DSH chat with tool call counts, risk scoring (0–100), suspicious activity tables, and intercepted commands. Flags: `--turn` (last turn only), `--all` (all sessions), `--json`, `--since=YYYY-MM-DD`.
+* **Persistent Audit Log (`AuditRecorder`)**: Records audit events to `<DSH_HOME>/shadow-auditor/<yyyy-mm>.jsonl` with serialized Promise write queue (no concurrency interleaving), automatic `.gz` compression above 50 MB, and 30-day retention pruning.
+* **Deep Core Telemetry Hooks**: Global interception via `tools/result` to capture actual execution outcomes (`result.isError`), sanitized error messages, and turn boundaries via `session/event` (`turn/end`).
+* **Network Exfiltration Guard**: Intercepts and blocks network utilities (`curl`, `wget`, `scp`, `ssh`, `nc`, `socat`) attempting to transmit credential files (`.env`, `id_rsa`, `.git-credentials`, etc.).
+* **Workspace Escape Redirect Guard**: Blocks shell redirects `>` and `>>` pointing outside the workspace (e.g. `/etc/`, `~/.bashrc`, `%USERPROFILE%`, cron).
+* **Smart `git push --force`**: Blocks `--force` targeting protected branches (`main`, `master`, `prod`) and protected remotes while preserving full rebasing freedom for local feature branches.
+* **Deterministic Risk Scoring (0–100)**: Objective scoring without LLM overhead, featuring a 10-minute rolling window for cumulative repeat-tag and consecutive high-risk penalties.
+* **Recursive Fixed-Point Redaction**: The `redactText` / `redactValue` module iteratively sanitizes deeply nested structures from tokens, passwords, and `.env` assignments until stable.
+
 ### v0.1.4 (Settings Slot Registration Hotfix)
 * **Declaration-Aware Slot Injection (`settings.plugin.item`)**: Plugin card registration now uses `ctx.slots.inject`, eliminating loader crashes caused by registering before the host entry declares the slot (`slot is not declared`).
 * **Fallback Settings Section (`settings.section`)**: Added automatic fallback to a standalone settings section managed with a timer and disposed via `ctx.effect` if `settings.plugin.item` is unavailable.

@@ -1,6 +1,6 @@
 {
   "name": "@goodandready/dsh-shadow-auditor",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "DSH plugin for background security audits, secret leakage detection, and command safety",
   "type": "module",
   "main": "lib/index.js",

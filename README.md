@@ -112,6 +112,10 @@ dsh-shadow-auditor:
 
 ## 🔄 Version History
 
+### v0.2.3 (Exfiltration False-Positive Hotfix)
+* **Resolved false-positive on legitimate API authorization**: allows agents to read and pass API keys in headers (e.g. `K=$(grep KEY ~/.dsh/.credentials.yaml) && curl ... -H "Authorization: Bearer $K"`).
+* **Precise Exfiltration Payload Detection**: network exfiltration guard now strictly targets actual credential file payload attachments (`-d @.env`, `-F file=@...`, `--post-file=...`), direct file piping (`cat .env | curl/nc`), input redirection (`< .env`), and remote file copies (`scp/rsync`).
+
 ### v0.2.0 (Audit Suite, Risk Scoring & Exfiltration Protection)
 * **Chat Slash Command `/audit`**: Generates a detailed Operation Bill directly in the DSH chat with tool call counts, risk scoring (0–100), suspicious activity tables, and intercepted commands. Flags: `--turn` (last turn only), `--all` (all sessions), `--json`, `--since=YYYY-MM-DD`.
 * **Persistent Audit Log (`AuditRecorder`)**: Records audit events to `<DSH_HOME>/shadow-auditor/<yyyy-mm>.jsonl` with serialized Promise write queue (no concurrency interleaving), automatic `.gz` compression above 50 MB, and 30-day retention pruning.

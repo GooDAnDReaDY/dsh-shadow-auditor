@@ -73,6 +73,10 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ## 🔄 版本记录
 
+### v0.2.3 (网络外发误报热修复)
+* **消除合法 API 调用的误报**: 允许通过 shell 从本地凭据配置读取密钥并作为请求头传入 (如 `K=$(grep KEY ~/.dsh/.credentials.yaml) && curl ... -H "Authorization: Bearer $K"`).
+* **精确网络外发攻击分析**: 仅针对将凭据文件本身作为负载传输 (`-d @.env`, `-F file=@...`, `--post-file=...`)、直接管道传输 (`cat .env | curl/nc`)、输入重定向 (`< .env`) 以及远程文件拷贝 (`scp/rsync`) 进行阻断。
+
 ### v0.2.0 (全功能审计套件、风险评分与外发防护)
 * **DSH 聊天斜杠命令 `/audit`**: 在对话中直接生成详尽的运维风险账单 (Operation Bill)——汇总工具调用次数、风险评分 (0–100)、可疑调用明细表以及被拦截的危险指令。支持参数：`--turn` (仅限当轮)、`--all` (全量历史)、`--json`、`--since=YYYY-MM-DD`。
 * **持久化审计归档 `AuditRecorder`**: 将调用事件以 JSONL 格式保存在 `<DSH_HOME>/shadow-auditor/<yyyy-mm>.jsonl` 中，依托 Promise 写入队列消除并发竞争，单文件超过 50 MB 自动 `.gz` 压缩并保留 30 天。

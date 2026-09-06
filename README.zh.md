@@ -73,6 +73,14 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ## 🔄 版本记录
 
+### v0.2.4 (DSH 插件规范修复与设置卡片优化)
+* **Web UI 设置卡片参数补齐**: 在前端卡片中完整支持审计日志参数 (`enableAuditLog` 启用日志、`maxFileSizeMb` 文件大小上限、`retentionDays` 归档保存天数)，并支持中英俄本地化 (#34)。
+* **消除双重插槽注册**: 移除了针对 `settings.section` 的 `setTimeout` 延迟回退机制，确保卡片原子化、稳定注入至 `settings.plugin.item` (#35)。
+* **配置不可用时禁用表单**: 当设置快照处于 `unavailable` 状态时，表单控件与保存按钮自动禁用 (`disabled: true`) 并显示不可用提示 (#32)。
+* **清理无用对等依赖**: 从 `package.json` 的 `peerDependencies` 中移除了未引用的 `@deepseek-ai/dsh-credentials` (#33)。
+* **样式隔离**: 为 `<style>` 标签附加 `data-dsh-plugin="dsh-shadow-auditor"` 属性，防止被相邻插件清理。
+* **设计契约**: 新增 `docs/design/DESIGN.md`，确立界面契约与状态流转规范。
+
 ### v0.2.3 (网络外发误报热修复)
 * **消除合法 API 调用的误报**: 允许通过 shell 从本地凭据配置读取密钥并作为请求头传入 (如 `K=$(grep KEY ~/.dsh/.credentials.yaml) && curl ... -H "Authorization: Bearer $K"`).
 * **精确网络外发攻击分析**: 仅针对将凭据文件本身作为负载传输 (`-d @.env`, `-F file=@...`, `--post-file=...`)、直接管道传输 (`cat .env | curl/nc`)、输入重定向 (`< .env`) 以及远程文件拷贝 (`scp/rsync`) 进行阻断。

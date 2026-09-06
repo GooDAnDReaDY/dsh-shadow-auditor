@@ -330,3 +330,27 @@ test('Report engine builds operation bills and parses flags', async () => {
   assert.ok(registeredRoute !== null);
   assert.equal(registeredRoute.path, '/dsh-shadow-auditor/audit');
 });
+
+test('Client UI card adheres to DSH authoring standards (#32, #33, #34, #35)', () => {
+  const clientSrc = read('lib/client.js');
+  const pkgData = JSON.parse(read('package.json'));
+
+  // #33: unused peer dsh-credentials must not exist in peerDependencies
+  assert.equal(pkgData.peerDependencies?.['@deepseek-ai/dsh-credentials'], undefined, 'dsh-credentials peerDependency must be removed');
+
+  // #35: avoid dual register / delayed fallback to settings.section
+  assert.ok(!clientSrc.includes('setTimeout'), 'lib/client.js must not contain setTimeout delayed fallback');
+  assert.ok(!clientSrc.includes("settings.section"), 'lib/client.js must not fall back to settings.section');
+
+  // #34: expose all config fields in client card
+  assert.ok(clientSrc.includes('enableAuditLog'), 'lib/client.js must include enableAuditLog');
+  assert.ok(clientSrc.includes('maxFileSizeMb'), 'lib/client.js must include maxFileSizeMb');
+  assert.ok(clientSrc.includes('retentionDays'), 'lib/client.js must include retentionDays');
+
+  // #32: disable form when snapshot status is unavailable
+  assert.ok(clientSrc.includes('disabled: !isReady || saving'), 'form fields must be disabled when snapshot is not ready');
+  assert.ok(clientSrc.includes('unavailable'), 'must display notice when settings are unavailable');
+
+  // Style isolation
+  assert.ok(clientSrc.includes('data-dsh-plugin'), 'style tag must include data-dsh-plugin attribute');
+});

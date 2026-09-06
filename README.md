@@ -112,6 +112,14 @@ dsh-shadow-auditor:
 
 ## 🔄 Version History
 
+### v0.2.4 (DSH Authoring Standards & Settings UI Card Enhancements)
+* **Comprehensive Settings Card Controls**: exposed audit log controls in the Web UI card (`enableAuditLog`, `maxFileSizeMb`, `retentionDays`) with English and Russian localization (#34).
+* **Elimination of Dual Registration**: removed `setTimeout` delayed fallback to `settings.section`; settings card registers cleanly and atomically into `settings.plugin.item` (#35).
+* **Disabled Form on Unavailable Snapshot**: when settings snapshot is `unavailable`, form inputs and the save button are disabled (`disabled: true`) and a warning notice is displayed (#32).
+* **Peer Dependencies Cleanup**: removed unused `@deepseek-ai/dsh-credentials` from `peerDependencies` in `package.json` (#33).
+* **Style Isolation**: added `data-dsh-plugin="dsh-shadow-auditor"` to `<style>` tag to prevent style purging by adjacent plugins.
+* **Design Contract**: added `docs/design/DESIGN.md` establishing the design specifications for all plugin surfaces.
+
 ### v0.2.3 (Exfiltration False-Positive Hotfix)
 * **Resolved false-positive on legitimate API authorization**: allows agents to read and pass API keys in headers (e.g. `K=$(grep KEY ~/.dsh/.credentials.yaml) && curl ... -H "Authorization: Bearer $K"`).
 * **Precise Exfiltration Payload Detection**: network exfiltration guard now strictly targets actual credential file payload attachments (`-d @.env`, `-F file=@...`, `--post-file=...`), direct file piping (`cat .env | curl/nc`), input redirection (`< .env`), and remote file copies (`scp/rsync`).

@@ -7,9 +7,9 @@
 
 ## User Surfaces
 - Web/UI: Карточка настроек плагина во вкладке «Настройки → Плагины → Настройки плагинов» (`settings.plugin.item`).
-- DSH UI / settings / slots: Слот `settings.plugin.item` со сворачиваемой карточкой `PluginCard`.
+- DSH UI / settings / slots: Слот `settings.plugin.item` со сворачиваемой карточкой `PluginCard`; слот `conversation.session.header.utilities` для значка безопасности `AuditShieldChip`.
 - API: HTTP GET `/dsh-shadow-auditor/audit` (JSON со статусом последнего сканирования и конфигурацией).
-- CLI: Слэш-команда `/audit` в чате DSH с флагами `--turn`, `--all`, `--json`, `--since=YYYY-MM-DD`.
+- CLI: Слэш-команда `/audit` в чате DSH с флагами `--turn`, `--all`, `--json`, `--since=YYYY-MM-DD`, `--limit=N` (по умолчанию 50 последних записей).
 - Документация: `README.md`, `README.ru.md`, `README.zh.md`.
 
 ## Visual Direction
@@ -24,7 +24,8 @@
 - Accessibility: Заголовок карточки является нативной кнопкой с `aria-expanded`, поля формы снабжены `label` и `disabled`-состояниями при недоступности бэкенда.
 
 ## Components And States
-- Компоненты: `PluginCard` со сворачиваемой шапкой, статусным бейджем (GREEN/YELLOW/RED), шевроном раскрытия, переключателями защит и полями конфигурации логирования.
+- Компоненты: `PluginCard` со сворачиваемой шапкой, статусным бейджем (GREEN/YELLOW/RED), шевроном раскрытия, переключателями защит и полями конфигурации логирования;
+  - `AuditShieldChip`: интерактивный чип-щит в шапке сессии (`conversation.session.header.utilities`), отображающий уровень безопасности в реальном времени с всплывающим окном.
 - Loading / empty / error / success:
   - `loading`: Отображение индикатора загрузки `Загрузка…` / `Loading…`.
   - `unavailable`: Блокировка формы (`disabled`), индикатор `Настройки временно недоступны` / `Settings service unavailable`.
@@ -47,3 +48,8 @@
 ## Locked Design Decisions
 - 2026-09-02 — Карточка настроек размещается строго в `settings.plugin.item`; отдельный боковой раздел запрещён, чтобы не загромождать плоский список навигации ядра.
 - 2026-09-06 — При `snap.status !== 'ready'` форма и кнопка сохранения блокируются (`disabled: true`), предотвращая ложное редактирование при недоступности сервиса настроек.
+- 2026-09-08 — Интерактивный бейдж безопасности `AuditShieldChip` зарегистрирован в слот `conversation.session.header.utilities` (`id: 'dsh-shadow-auditor-chip'`) с полной изоляцией стилей и переменными тем ядра DSH.
+- 2026-09-08 — Чтение журнала аудита ограничено `readRecent(limit)` без распаковки архивных `.gz` файлов для исключения OOM.
+- 2026-09-08 — Исключены ложные срабатывания безопасных команд (разрешены `grep -i kill`, `systemctl status`, `systemctl is-active`).
+- 2026-09-08 — Утечки памяти устранены: карты сессий снабжены LRU-ограничением и слушателями очистки при уничтожении сессий.
+- 2026-09-08 — Удален шумный инструмент `shadow_auditor_rules_list`; политики безопасности функционируют декларативно.

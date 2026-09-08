@@ -125,7 +125,7 @@ dsh-shadow-auditor:
 * **Precise Exfiltration Payload Detection**: network exfiltration guard now strictly targets actual credential file payload attachments (`-d @.env`, `-F file=@...`, `--post-file=...`), direct file piping (`cat .env | curl/nc`), input redirection (`< .env`), and remote file copies (`scp/rsync`).
 
 ### v0.2.0 (Audit Suite, Risk Scoring & Exfiltration Protection)
-* **Chat Slash Command `/audit`**: Generates a detailed Operation Bill directly in the DSH chat with tool call counts, risk scoring (0–100), suspicious activity tables, and intercepted commands. Flags: `--turn` (last turn only), `--all` (all sessions), `--json`, `--since=YYYY-MM-DD`.
+* **Chat Slash Command `/audit`**: Generates a detailed Operation Bill directly in the DSH chat with tool call counts, risk scoring (0–100), suspicious activity tables, and intercepted commands. Flags: `--turn` (last turn only), `--all` (all sessions), `--json`, `--since=YYYY-MM-DD`, `--limit=N` (defaults to 50).
 * **Persistent Audit Log (`AuditRecorder`)**: Records audit events to `<DSH_HOME>/shadow-auditor/<yyyy-mm>.jsonl` with serialized Promise write queue (no concurrency interleaving), automatic `.gz` compression above 50 MB, and 30-day retention pruning.
 * **Deep Core Telemetry Hooks**: Global interception via `tools/result` to capture actual execution outcomes (`result.isError`), sanitized error messages, and turn boundaries via `session/event` (`turn/end`).
 * **Network Exfiltration Guard**: Intercepts and blocks network utilities (`curl`, `wget`, `scp`, `ssh`, `nc`, `socat`) attempting to transmit credential files (`.env`, `id_rsa`, `.git-credentials`, etc.).
@@ -133,6 +133,14 @@ dsh-shadow-auditor:
 * **Smart `git push --force`**: Blocks `--force` targeting protected branches (`main`, `master`, `prod`) and protected remotes while preserving full rebasing freedom for local feature branches.
 * **Deterministic Risk Scoring (0–100)**: Objective scoring without LLM overhead, featuring a 10-minute rolling window for cumulative repeat-tag and consecutive high-risk penalties.
 * **Recursive Fixed-Point Redaction**: The `redactText` / `redactValue` module iteratively sanitizes deeply nested structures from tokens, passwords, and `.env` assignments until stable.
+
+### v0.2.5 (Stability, Memory & UI Security Shield Overhaul)
+* **Header Security Shield Slot (`conversation.session.header.utilities`)**: Injected real-time `AuditShieldChip` showing session security status and quick audit popup.
+* **OOM Prevention in Audit Recorder**: Added `readRecent(limit)` to stream and cap reading of recent records without unpacking historical compressed `.gz` archives.
+* **Slash Command `--limit=N`**: `/audit` defaults to the last 50 records tail with configurable `--limit=N`.
+* **Lifecycle & Memory Leak Cleanup**: Session turn and event caches are properly pruned on `session/destroy` and capped with LRU eviction.
+* **Command Guard False-Positive Fixes**: Refined regexes to safely allow harmless commands such as `grep -i kill` and `systemctl status` while strictly blocking destructive operations.
+* **Reduced LLM Cognitive Overhead**: Removed redundant `shadow_auditor_rules_list` tool to minimize model prompt pollution.
 
 ### v0.1.4 (Settings Slot Registration Hotfix)
 * **Declaration-Aware Slot Injection (`settings.plugin.item`)**: Plugin card registration now uses `ctx.slots.inject`, eliminating loader crashes caused by registering before the host entry declares the slot (`slot is not declared`).

@@ -22,7 +22,7 @@ Refactor @goodandready/dsh-shadow-auditor to address 10 critical stability, qual
 - [ ] Phase 6: Release cycle (PR, test server, production candidate, publication)
 EOF
 
-cat << \EOF\ > /mnt/external/Project/DEV/dhsplugins/dsh-shadow-auditor/.worktrees/fix-stability-overhaul-0.2.5/docs/plans/progress.md
+cat << \EOF\ > docs/plans/progress.md
 # Progress Log: Issue #37 Stability Overhaul
 
 ## Session Start: 2026-09-08
@@ -31,7 +31,7 @@ cat << \EOF\ > /mnt/external/Project/DEV/dhsplugins/dsh-shadow-auditor/.worktree
 - Initialized task_plan.md and findings.md
 EOF
 
-cat << \EOF\ > /mnt/external/Project/DEV/dhsplugins/dsh-shadow-auditor/.worktrees/fix-stability-overhaul-0.2.5/docs/plans/findings.md
+cat << \EOF\ > docs/plans/findings.md
 # Findings & Architecture Decisions
 
 1. Slots in DSH:

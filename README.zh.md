@@ -95,6 +95,14 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 * **确定性风险评分 (0–100)**: 无需消耗大模型 token 的快速风险定级引擎，配备 10 分钟滑动窗口识别高频同类操作与连续高危行为。
 * **不动点递归脱敏**: `redactText` / `redactValue` 模块递归清理深层嵌套结构中的 token、密码及 `.env` 敏感赋值，直至数据完全收敛。
 
+### v0.2.5 (稳定性、内存管理与UI盾牌组件重构)
+* **会话头部安全盾牌插槽 (`conversation.session.header.utilities`)**: 注入实时 `AuditShieldChip` 组件，显示安全状态与快速审计弹窗。
+* **审计日志 OOM 防护**: `AuditRecorder` 增加 `readRecent(limit)`，默认仅读取近期记录，不再解压历史 `.gz` 文件。
+* **斜杠命令 `--limit=N`**: `/audit` 默认显示最近 50 条记录。
+* **内存泄漏清理**: 增加会话生命周期监听与 LRU 缓存上限。
+* **消除命令误报**: 允许 `grep -i kill` 与 `systemctl status`。
+* **移除冗余工具**: 移除 `shadow_auditor_rules_list` 降低模型提示词负担。
+
 ### v0.1.4 (设置插槽注册热修复)
 * **声明感知的插槽注入 (`settings.plugin.item`)**: 设置卡片注册全面迁移至 `ctx.slots.inject`，彻底解决在父级插槽尚未声明时直接注册导致的加载器崩溃 (`slot is not declared`)。
 * **后备设置项 (`settings.section`)**: 在当前 DSH 构建缺少插件卡片插槽时，自动降级至独立设置分区，并通过 `ctx.effect` 安全管理生命周期。

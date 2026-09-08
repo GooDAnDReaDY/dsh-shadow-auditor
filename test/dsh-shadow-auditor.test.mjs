@@ -295,7 +295,8 @@ test('Report engine builds operation bills and parses flags', async () => {
   assert.equal(registeredTools.length, 3);
   assert.ok(registeredTools.some(t => t.name === 'shadow_auditor_scan_diff'));
   assert.ok(registeredTools.some(t => t.name === 'shadow_auditor_check_command'));
-  assert.ok(registeredTools.some(t => t.name === 'shadow_auditor_rules_list'));
+  assert.ok(registeredTools.some(t => t.name === 'shadow_auditor_scan_diff'));
+  assert.ok(registeredTools.some(t => t.name === 'shadow_auditor_check_command'));
 
   // 2. Verify guard blocks dangerous command
   assert.ok(guardFn !== null);
@@ -353,4 +354,38 @@ test('Client UI card adheres to DSH authoring standards (#32, #33, #34, #35)', (
 
   // Style isolation
   assert.ok(clientSrc.includes('data-dsh-plugin'), 'style tag must include data-dsh-plugin attribute');
+});
+
+
+test('CommandSafetyGuard does not false-positive on grep kill or systemctl status', async () => {
+  const { findDangerous } = await import('../lib/guards/command.js');
+  assert.strictEqual(findDangerous('grep -i kill process.log'), undefined);
+  assert.strictEqual(findDangerous('systemctl status dsh-web.service'), undefined);
+  assert.strictEqual(findDangerous('systemctl is-active nginx'), undefined);
+
+  // Destructive commands must still be blocked
+  assert.ok(findDangerous('kill -9 1234'));
+  assert.ok(findDangerous('sudo systemctl restart dsh-web.service'));
+  assert.ok(findDangerous('systemctl stop nginx'));
+});
+
+test('AuditRecorder readRecent reads capped list without unhandled errors', async () => {
+  const { AuditRecorder } = await import('../lib/recorder.js');
+  const tmpDir = path.join(os.tmpdir(), 'shadow-auditor-recent-test-' + Date.now());
+  const rec = new AuditRecorder({ dir: tmpDir });
+  for (let i = 0; i < 60; i++) {
+    await rec.record({ time: new Date(Date.now() + i * 1000).toISOString(), callId: 'c' + i, score: 10 });
+  }
+  const recent50 = await rec.readRecent(50);
+  assert.strictEqual(recent50.length, 50);
+  const recent10 = await rec.readRecent(10);
+  assert.strictEqual(recent10.length, 10);
+  await fs.promises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+});
+
+test('Client UI registers AuditShieldChip into conversation.session.header.utilities', () => {
+  const clientSrc = fs.readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8');
+  assert.ok(clientSrc.includes('AuditShieldChip'), 'AuditShieldChip component must exist');
+  assert.ok(clientSrc.includes('conversation.session.header.utilities'), 'conversation.session.header.utilities slot must be registered');
+  assert.ok(clientSrc.includes('dsh-shadow-auditor-chip'), 'Chip ID must be dsh-shadow-auditor-chip');
 });

@@ -14,3 +14,5 @@
 - `git -C ...dsh-shadow-auditor log --oneline`: b1f0244 test: add package identity..., fb00fd2 feat: initial...
 - Gitea API (opencode token a331cc84): issues 0, pulls 0 — repo чист.
 - Локально `dsh-approval-gate` пуст (только .worktrees), исходник взят через `GET /repos/goodandready/dsh-approval-gate/contents/lib/index.js` — 3276b, 7 паттернов извлечены.
+
+- $(date -Iseconds): All 13 tests passed (12 passed, 1 skipped). Updated package.json to 0.2.5, updated DESIGN.md and readmes. npm pack dry run succeeded.

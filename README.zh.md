@@ -95,6 +95,15 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 * **确定性风险评分 (0–100)**: 无需消耗大模型 token 的快速风险定级引擎，配备 10 分钟滑动窗口识别高频同类操作与连续高危行为。
 * **不动点递归脱敏**: `redactText` / `redactValue` 模块递归清理深层嵌套结构中的 token、密码及 `.env` 敏感赋值，直至数据完全收敛。
 
+### v0.2.6 (代码安全 Diff 门禁与 SAST 引擎)
+* **代码安全 Diff 门禁 (`lib/diff-gate/`)**: 在代理操作确认边界处对补丁和文件变更进行多类别静态分析。
+* **规范化发现模型**: 稳定规则标识符 (`SEC-*`, `SAST-*`, `PI-*`)、严重性评级、风险解释与修复建议。
+* **增强型凭证扫描器**: 支持香农熵检测及高熵密钥识别。
+* **轻量级 SAST 规则集**: 检测 SQL 注入、命令注入、路径遍历、硬编码密码与 eval 代码执行。
+* **提示词注入启发式扫描**: 识别隐藏在代码变更中的越狱与系统提示词窃取指令。
+* **门禁策略 (`disabled`, `warning`, `block`)**: 可在设置面板配置，block 模式可阻断高危漏洞。
+* **行内误报抑制**: 支持 `// shadow-audit-ignore: <ruleId>` 局部忽略规则。
+
 ### v0.2.5 (稳定性、内存管理与UI盾牌组件重构)
 * **会话头部安全盾牌插槽 (`conversation.session.header.utilities`)**: 注入实时 `AuditShieldChip` 组件，显示安全状态与快速审计弹窗。
 * **审计日志 OOM 防护**: `AuditRecorder` 增加 `readRecent(limit)`，默认仅读取近期记录，不再解压历史 `.gz` 文件。

@@ -134,6 +134,15 @@ dsh-shadow-auditor:
 * **Deterministic Risk Scoring (0–100)**: Objective scoring without LLM overhead, featuring a 10-minute rolling window for cumulative repeat-tag and consecutive high-risk penalties.
 * **Recursive Fixed-Point Redaction**: The `redactText` / `redactValue` module iteratively sanitizes deeply nested structures from tokens, passwords, and `.env` assignments until stable.
 
+### v0.2.6 (Code-Security Diff Gate & SAST Engine)
+* **Code-Security Diff Gate (`lib/diff-gate/`)**: Multi-category scanner analyzing file diffs and modifications on approval boundaries.
+* **Normalized Finding Schema**: Structured findings with stable identifiers (`SEC-*`, `SAST-*`, `PI-*`), severity, category, evidence range, explanation, and suggestion-only remediations.
+* **Enhanced Secret Scanner**: Added Shannon entropy scoring for high-entropy tokens and expanded API key detection.
+* **Lightweight SAST Engine**: Detects SQL injection, command injection in shell execution, path traversal, hardcoded passwords, and arbitrary code evaluation.
+* **Prompt-Injection Heuristic Scanner**: Detects instruction overrides, jailbreak markers, and confidential context exfiltration within modified files.
+* **Gate Policy (`disabled`, `warning`, `block`)**: Configurable via Web UI settings card; block mode stops critical/high vulnerabilities from executing.
+* **Auditable Inline Suppression**: Support for `// shadow-audit-ignore: <ruleId>` comments to bypass false positives without disabling global rules.
+
 ### v0.2.5 (Stability, Memory & UI Security Shield Overhaul)
 * **Header Security Shield Slot (`conversation.session.header.utilities`)**: Injected real-time `AuditShieldChip` showing session security status and quick audit popup.
 * **OOM Prevention in Audit Recorder**: Added `readRecent(limit)` to stream and cap reading of recent records without unpacking historical compressed `.gz` archives.

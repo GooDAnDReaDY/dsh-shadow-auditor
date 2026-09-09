@@ -112,6 +112,13 @@ dsh-shadow-auditor:
 
 ## 🔄 Version History
 
+### v0.2.7 (Stability Refinements & False-Positive Elimination)
+* **Secret-Write False-Positive Fix**: `secret-write` guard strictly targets actual secret and credential stores (`.env`, `.credentials`, SSH keys) without falsely matching developer scripts such as `check_token.js` or test suites `test_secret.py`.
+* **Smart SAST Comment Filtering**: Comments containing SQL keywords or `eval` examples no longer trigger code security alerts. Safe relative path traversal via `import.meta.url` and `__dirname` is permitted.
+* **Diff Gate Resource Limits**: Line scanning truncates beyond 2048 characters to protect against minified bundle stalls, and test files bypass prompt injection heuristics.
+* **Bounded Chat /audit**: Chat slash command reads recent 50 entries by default to prevent OOM on large logs (override with `--all`).
+* **Tab Visibility Polling**: Background tab polling in `AuditShieldChip` is paused when document is hidden.
+
 ### v0.2.4 (DSH Authoring Standards & Settings UI Card Enhancements)
 * **Comprehensive Settings Card Controls**: exposed audit log controls in the Web UI card (`enableAuditLog`, `maxFileSizeMb`, `retentionDays`) with English and Russian localization (#34).
 * **Elimination of Dual Registration**: removed `setTimeout` delayed fallback to `settings.section`; settings card registers cleanly and atomically into `settings.plugin.item` (#35).

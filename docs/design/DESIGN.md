@@ -57,3 +57,20 @@
 - 2026-09-08 — Поддерживаются режимы diffGateMode: disabled, warning (формирование находок и аудит), block (блокировка выполнения с рекомендациями по исправлению).
 - 2026-09-08 — Реализован механизм подавления ложных срабатываний через директиву в коде `// shadow-audit-ignore: <ruleId>` или `# shadow-audit-ignore: <ruleId>`.
 - 2026-09-08 — Рекомендации по исправлению строго рекомендательные (suggestion-only); автоматическое изменение или коммит кода шлюзом запрещены.
+## 10. v0.2.7 Stability Refinements & False-Positive Elimination
+
+### 10.1 False-Positive Elimination in Command Guard
+- Refined `secret-write` regex in `lib/guards/command.js`: destination targeting now strictly matches credentials and secret files (`.env`, `.credentials`, `.git-credentials`, `.netrc`, `.pgpass`, `id_rsa`, `id_ed25519`, `*key.pem`) without falsely matching developer scripts such as `check_token.js` or test suites `test_secret.py`.
+
+### 10.2 Noise Suppression in Diff Gate SAST
+- Lines recognized as comments (`//`, `#`, `*`, `/*`) bypass dynamic code execution and SQL injection rules in `lib/diff-gate/sast.js`, eliminating false alerts on explanatory comments while keeping real secret detection intact.
+- Path traversal (`SAST-PATH-001`) permits safe resolution via `import.meta.url` and `__dirname`.
+
+### 10.3 Test Suite & Documentation Isolation in Diff Gate
+- Prompt injection heuristics are bypassed for test files (`test/**`, `*.test.*`, `*.spec.*`) and fixtures, enabling security test suites to run without self-blocking.
+- Overly long lines in unified diffs (> 2048 characters) are truncated before scanning to eliminate CPU lockup on minified bundles.
+
+### 10.4 Slash Command Memory Safety & UI Polling
+- `/audit` slash command in chat defaults to bounded reading (`readRecent(flags.limit ?? 50)`) unless explicitly invoked with `--all`, preventing memory bloat on large audit journals.
+- `AuditShieldChip` in `lib/client.js` suspends HTTP polling while the browser tab is hidden (`document.hidden`), preserving server and client CPU resources.
+- Audit archive rotation errors are safely logged through plugin logger.

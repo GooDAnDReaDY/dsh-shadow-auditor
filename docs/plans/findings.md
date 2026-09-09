@@ -1,5 +1,7 @@
-# Findings: Code-Security Diff Gate (#39)
+# Findings: Stability Refinements (#41)
 
-- Scanner must operate on line-based unified diffs or whole file content changes.
-- Bounded performance: Limit scan length (e.g. max 500 KB per diff chunk) to prevent event-loop freezing.
-- Redaction: Any evidence string emitted in findings must be processed through redaction engine so secrets are never echoed in findings or logs.
+- `secret-write` regex must target actual secret storage patterns (`.env`, `.credentials`, `.git-credentials`, `.netrc`, `.pgpass`, `id_rsa`, `key.pem`) instead of any file with substring 'token' or 'secret'.
+- SAST lines that are purely comments (//, #, /*, *) must be skipped.
+- `fs.readFileSync(new URL('...', import.meta.url))` must not trigger path traversal.
+- Test and doc files should skip prompt injection detection.
+- `/audit` must default to `readRecent(flags.limit || 50)`.

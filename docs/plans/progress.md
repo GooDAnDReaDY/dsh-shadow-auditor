@@ -1,6 +1,4 @@
-# Progress: Code-Security Diff Gate (#39)
+# Progress: Stability Refinements (#41)
 
-- Worktree initialized on branch `feat/code-security-diff-gate-0.2.6` from `main`.
-- Gitea Issue #39 status set to `status/in-progress`.
-
-- $(date -Iseconds): Implemented Diff Gate (schema, secrets, sast, prompt-injection, gate runner), wired into lib/index.js guard and tools, updated lib/client.js settings and badge. All 21 tests pass. Version bumped to 0.2.6.
+- Gitea Issue #41 opened.
+- Worktree created on branch `fix/stability-refinements-0.2.7`.

@@ -1,16 +1,14 @@
-# Task Plan: Code-Security Diff Gate (#39) (v0.2.6)
+# Task Plan: Stability Refinements (#41) (v0.2.7)
 
 ## Overview
-Extend `@goodandready/dsh-shadow-auditor` into a code-security diff gate on diff/approval boundaries.
+Eliminate false positives, fix /audit slash command OOM, and optimize polling in `@goodandready/dsh-shadow-auditor`.
 
 ## Phases
-- [x] Phase 1: Security Finding & Rule Schema (`lib/diff-gate/schema.js`)
-- [x] Phase 2: Enhanced Secret Scanner with Shannon Entropy (`lib/diff-gate/secrets.js`)
-- [x] Phase 3: Lightweight SAST Rules (SQLi, Shell, Path, Hardcoded Secrets) (`lib/diff-gate/sast.js`)
-- [x] Phase 4: Prompt-Injection Heuristic Scanner (`lib/diff-gate/prompt-injection.js`)
-- [x] Phase 5: Diff Gate Orchestration, Warning/Block Policy & Suppression (`lib/diff-gate/gate.js`)
-- [x] Phase 6: Core Plugin Integration & Audit Trail (`lib/index.js`, `lib/recorder.js`)
-- [x] Phase 7: UI Settings & Header Shield Extension (`lib/client.js`)
-- [x] Phase 8: Unit Testing & Synthetic Fixtures (`test/diff-gate.test.mjs`)
-- [x] Phase 9: Design Contract & Multilingual Documentation
-- [ ] Phase 10: Test Server (MiniPC) & Production Verification, Release Gate
+- [ ] Phase 1: Command Guard Precision (`lib/guards/command.js`)
+- [ ] Phase 2: SAST Comments and Path Traversal Whitelisting (`lib/diff-gate/sast.js`)
+- [ ] Phase 3: Test and Doc File Awareness (`lib/diff-gate/gate.js`)
+- [ ] Phase 4: /audit Slash Command OOM Fix (`lib/index.js`)
+- [ ] Phase 5: Client Tab Visibility Optimization & Error Logging (`lib/client.js`, `lib/recorder.js`)
+- [ ] Phase 6: Unit Test Coverage for Edge Cases (`test/stability-027.test.mjs`)
+- [ ] Phase 7: Docs, Version Bump to 0.2.7, Packaging
+- [ ] Phase 8: Verification (Test Server MiniPC & Production RC MiniAI)

@@ -73,6 +73,13 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ## 🔄 版本记录
 
+### v0.2.7 (稳定性与误报优化)
+* **消除 secret-write 误报**：不再对 `check_token.js` 或 `test_secret.py` 误报拦截，仅严格保护 `.env`、`.credentials`、SSH密钥等核心凭据。
+* **SAST 注释智能过滤**：包含 SQL 关键字或 eval 示例的注释不再触发误报；允许通过 `import.meta.url` 和 `__dirname` 进行安全相对路径解析。
+* **Diff 门禁资源保护**：超长行（>2048字符）截断扫描防卡死；测试文件自动跳过 prompt injection 检查。
+* **安全 /audit 命令**：默认加载最近 50 条记录，防止大日志导致内存溢出（支持 `--all`）。
+* **后台标签页轮询节流**：网页不可见时自动暂停状态轮询。
+
 ### v0.2.4 (DSH 插件规范修复与设置卡片优化)
 * **Web UI 设置卡片参数补齐**: 在前端卡片中完整支持审计日志参数 (`enableAuditLog` 启用日志、`maxFileSizeMb` 文件大小上限、`retentionDays` 归档保存天数)，并支持中英俄本地化 (#34)。
 * **消除双重插槽注册**: 移除了针对 `settings.section` 的 `setTimeout` 延迟回退机制，确保卡片原子化、稳定注入至 `settings.plugin.item` (#35)。

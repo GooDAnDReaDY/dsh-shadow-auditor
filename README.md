@@ -112,6 +112,12 @@ dsh-shadow-auditor:
 
 ## 🔄 Version History
 
+### v0.2.8 (UI Unification & Settings Sync)
+* **Unified UI Style (Aligned with `dsh-clinebot`)**: Redesigned client settings card into four structured section cards using native DSH design tokens (`--dsw-alias-*`), clean responsive grids, status badges, and styled form controls.
+* **Complete Settings Synchronization**: Added full reactive tracking and draft persistence for `diffGateMode`, `enableSastScan`, and `enablePromptInjectionScan`.
+* **Hardened Error Handling**: Replaced silent catch blocks with logger diagnostics.
+* **Expanded Test Coverage**: Added dedicated unit test suite `test/ui-and-stability-028.test.mjs` (26 test suites passing).
+
 ### v0.2.7 (Stability Refinements & False-Positive Elimination)
 * **Secret-Write False-Positive Fix**: `secret-write` guard strictly targets actual secret and credential stores (`.env`, `.credentials`, SSH keys) without falsely matching developer scripts such as `check_token.js` or test suites `test_secret.py`.
 * **Smart SAST Comment Filtering**: Comments containing SQL keywords or `eval` examples no longer trigger code security alerts. Safe relative path traversal via `import.meta.url` and `__dirname` is permitted.

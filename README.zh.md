@@ -73,6 +73,12 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ## 🔄 版本记录
 
+### v0.2.8 (界面统一与设置同步)
+* **统一UI设计风格（对齐 `dsh-clinebot`）**：采用原生 DSH 设计令牌，将设置页面重构为4个结构化卡片分区，提供一致的网格布局、状态徽标与表单控件。
+* **完整的配置响应式同步**：草稿状态完整支持 `diffGateMode`、`enableSastScan` 和 `enablePromptInjectionScan` 的持久化保存。
+* **异常处理增强**：消除静默 catch 代码块，增加规范的日志记录。
+* **测试覆盖扩充**：新增 `test/ui-and-stability-028.test.mjs` 测试套件（26项测试全部通过）。
+
 ### v0.2.7 (稳定性与误报优化)
 * **消除 secret-write 误报**：不再对 `check_token.js` 或 `test_secret.py` 误报拦截，仅严格保护 `.env`、`.credentials`、SSH密钥等核心凭据。
 * **SAST 注释智能过滤**：包含 SQL 关键字或 eval 示例的注释不再触发误报；允许通过 `import.meta.url` 和 `__dirname` 进行安全相对路径解析。

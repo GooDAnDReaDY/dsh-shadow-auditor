@@ -74,3 +74,18 @@
 - `/audit` slash command in chat defaults to bounded reading (`readRecent(flags.limit ?? 50)`) unless explicitly invoked with `--all`, preventing memory bloat on large audit journals.
 - `AuditShieldChip` in `lib/client.js` suspends HTTP polling while the browser tab is hidden (`document.hidden`), preserving server and client CPU resources.
 - Audit archive rotation errors are safely logged through plugin logger.
+
+## 11. v0.2.8 UI Design System Unification & Robustness
+
+### 11.1 Visual Styling Aligned with `dsh-clinebot`
+- **Container Structure**: Adopted four clean, structured section cards (`.sa-section-card`, `.sa-grid-2`, `.sa-row`) matching the DSH design system layout:
+  1. `Execution Safety & Guards` (Strict secrets, dangerous command interception, shield chip toggle).
+  2. `Code-Security Diff Gate & SAST` (Policy select: Disabled/Warning/Block, SAST analysis toggle, Prompt-injection scanner toggle).
+  3. `Audit Trail & Storage` (Persistent JSONL log toggle, gzip size threshold, retention days).
+  4. `Live Telemetry & Diagnostics` (Real-time security shield status, recent interception hits with labels and timestamps).
+- **Design Tokens**: Standardized onto native DSH variables (`--dsw-alias-border-l2`, `--dsw-alias-bg-layer-3`, `--dsw-alias-bg-layer-2`, `--dsw-alias-label-primary`, `--dsw-alias-label-secondary`, `--dsw-alias-state-brand-primary`).
+- **Isolation**: Clean `<style>` tag injection with `id="dsh-shadow-auditor-full-css"` and `data-dsh-plugin="@goodandready/dsh-shadow-auditor"`.
+
+### 11.2 Settings Synchronization & Catch Hardening
+- Client draft state correctly binds and syncs `diffGateMode`, `enableSastScan`, and `enablePromptInjectionScan` from the settings snapshot.
+- Replaced silent empty catch blocks in `lib/index.js` and `lib/client.js` with logger warnings.

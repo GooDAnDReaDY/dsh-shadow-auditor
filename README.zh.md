@@ -83,6 +83,15 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 ## 🔄 版本记录
 
+### v0.2.9 (安全功能演进与规范语言支持)
+- **规范语言标准**：代码及界面全面支持英文（`en`）与中文（`zh`）；俄语本地化通过 `goodandready/dsh-russian-lang` 维护。
+- **发布包规范**：彻底清除 `AGENTS.md` 与 `index.md` 等非产品文件；严格执行单个文件 $\le 256$ KiB 上限。
+- **实时拦截与审计日志流**：支持按全部、Shell 防护、差异网关和高风险进行分类过滤与刷新。
+- **自定义安全策略**：支持命令与敏感路径的自定义正则表达式黑名单，并提供强制阻断与仅审计模式。
+- **差异网关可视化检查与修复建议**：展示可疑代码行高亮及安全替代建议（Safe Remediation）。
+- **文件完整性与敏感锚点监控**：主动拦截对 `.env`、`settings.yaml` 及密钥文件的读写尝试。
+- **合规审计导出**：界面一键导出 JSON 日志或 Markdown 审计对账单。
+
 ### v0.2.8 (界面统一与设置同步)
 * **统一UI设计风格（对齐 `dsh-clinebot`）**：采用原生 DSH 设计令牌，将设置页面重构为4个结构化卡片分区，提供一致的网格布局、状态徽标与表单控件。
 * **完整的配置响应式同步**：草稿状态完整支持 `diffGateMode`、`enableSastScan` 和 `enablePromptInjectionScan` 的持久化保存。

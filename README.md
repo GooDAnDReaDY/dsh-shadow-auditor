@@ -122,6 +122,15 @@ dsh-shadow-auditor:
 
 ## 🔄 Version History
 
+### v0.2.9 (Security Evolution & Canonical Localization)
+- **Canonical Language Standard**: Complete runtime and client localization in English (`en`) and Chinese (`zh`); Russian localization managed via `goodandready/dsh-russian-lang`.
+- **Packaging Hygiene**: Clean distribution package with non-product files (`AGENTS.md`, `index.md`) purged; strict $\le 256$ KiB file limit.
+- **Real-Time Interception Feed**: Live telemetry event viewer with filtering by All, Shell Guard, Diff Gate, and High Risk.
+- **Configurable Security Policies**: Custom regex blocklists for shell commands and sensitive paths, with Enforce vs Audit-only modes.
+- **Diff Gate Visual Inspector & Remediation**: Inline inspector showing offending code snippets and actionable safe remediation hints.
+- **File Integrity & Secret Anchor Monitor**: Proactive interception of file tools touching `.env`, `settings.yaml`, and credential anchors.
+- **Compliance Export**: One-click export of audit logs to JSON or Markdown Operation Bills from UI or HTTP endpoints.
+
 ### v0.2.8 (UI Unification & Settings Sync)
 * **Unified UI Style (Aligned with `dsh-clinebot`)**: Redesigned client settings card into four structured section cards using native DSH design tokens (`--dsw-alias-*`), clean responsive grids, status badges, and styled form controls.
 * **Complete Settings Synchronization**: Added full reactive tracking and draft persistence for `diffGateMode`, `enableSastScan`, and `enablePromptInjectionScan`.

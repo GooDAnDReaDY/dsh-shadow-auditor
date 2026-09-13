@@ -217,8 +217,8 @@ test('Report engine builds operation bills and parses flags', async () => {
 
   const md = billToMarkdown(bill);
   assert.ok(md.includes('session-123'));
-  assert.ok(md.includes('Операции с повышенным риском'));
-  assert.ok(md.includes('Перехваченные команды'));
+  assert.ok(md.includes('High Risk Operations'));
+  assert.ok(md.includes('Intercepted Commands'));
 });test('In-memory Cordis plugin composition: apply, tools, guard, telemetry and /audit command', async (t) => {
   let plugin;
   try {

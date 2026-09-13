@@ -89,3 +89,30 @@
 ### 11.2 Settings Synchronization & Catch Hardening
 - Client draft state correctly binds and syncs `diffGateMode`, `enableSastScan`, and `enablePromptInjectionScan` from the settings snapshot.
 - Replaced silent empty catch blocks in `lib/index.js` and `lib/client.js` with logger warnings.
+
+## 12. v0.2.9 Canonical Localization, Packaging Hygiene & Security Evolution
+
+### 12.1 Canonical Language Standard & Localization Policy
+- **English & Chinese Only**: Runtime code, guard error messages, slash commands, default notifications, and UI locale dictionaries in `lib/client.js` are strictly in canonical English (`en`) and Chinese (`zh`).
+- **Russian Translation Governance**: In accordance with `dhs-plugin-release-workflow`, all Russian UI translations are extracted from plugin code and submitted as tracking issues to `goodandready/dsh-russian-lang` on Gitea.
+- **Multilingual Documentation**: `README.md`, `README.ru.md`, and `README.zh.md` remain synchronized in the repository.
+
+### 12.2 Clean Distribution Packaging
+- Non-product files (`AGENTS.md`, `index.md`, internal plans, scratch scripts) are untracked from git and excluded from release tarballs.
+- Package files are strictly validated with `npm pack --dry-run --json` against the 256 KiB per-file limit.
+
+### 12.3 Five Core Functional Capabilities
+1. **Real-Time Interception Feed & Session Log Viewer**:
+   - HTTP endpoint `GET /dsh-shadow-auditor/events` with query parameters (`limit`, `filter`, `sessionId`).
+   - Interactive UI filter tabs (`All`, `Shell Guard`, `Diff Gate`, `High Risk`) with live refresh.
+2. **Configurable Security Policies & Custom Blacklists**:
+   - `customBlockedCommands`: multiline regex patterns to block arbitrary shell commands.
+   - `sensitivePathPatterns`: multiline file patterns to guard sensitive files.
+   - `shellGuardMode`: toggle between `enforce` (blocking) and `audit_only` (warning-only).
+3. **Diff Gate Visual Inspector & Safe Remediation Preview**:
+   - Structured remediation guidance (`💡 Safe Remediation Suggestion`) rendered directly inside Diff Gate findings.
+4. **File Integrity & Secret Anchor Monitor**:
+   - Interception of file tools (`read_file`, `write_to_file`, etc.) accessing sensitive credentials or anchors (`.env`, `settings.yaml`, `id_rsa`, `server.key`).
+5. **Security Audit & Compliance Export**:
+   - HTTP endpoint `GET /dsh-shadow-auditor/export` producing JSON telemetry records or formatted Markdown Operation Bills.
+   - UI export buttons in header.

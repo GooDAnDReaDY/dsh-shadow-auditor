@@ -201,3 +201,11 @@ dsh-shadow-auditor:
 ## 📄 License
 
 MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
+
+## Changes in v0.2.10
+
+This release fixes two command-guard false positives, preserves recursive-delete and protected-file write protection, and adds safe debug diagnostics for best-effort failures.
+
+The command firewall allows rm -f when no recursive flag is present. It continues to block rm -r and rm -rf, including combined or split recursive flags. Protected-file write checks run separately for shell commands and pipeline stages, so a stderr redirect in one command cannot color a later read. Reading settings.yaml with grep, cat, or sed without in-place mode is allowed; writes through redirects, tee, or in-place edits remain blocked.
+
+The analyzer respects quoted and escaped separators. These changes do not alter the network, SQL, service-control, protected Git, device-write, or workspace-escape rules. The guard uses bounded command analysis rather than a complete Bash AST.

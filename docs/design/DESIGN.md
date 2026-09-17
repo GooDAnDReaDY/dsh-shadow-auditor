@@ -116,3 +116,11 @@
 5. **Security Audit & Compliance Export**:
    - HTTP endpoint `GET /dsh-shadow-auditor/export` producing JSON telemetry records or formatted Markdown Operation Bills.
    - UI export buttons in header.
+
+
+## 13. Command Guard False-Positive Scope (#56)
+
+- rm -f without a recursive flag is allowed. Any rm option group containing r, including -r, -rf, -fr, and split flags, remains blocked.
+- Secret and environment write checks run independently on commands separated by semicolon, &&, ||, pipe, and newlines. Quoted or escaped separators do not split the text.
+- Reading settings.yaml with grep, cat, or sed without -i is allowed. Redirection, tee, and in-place edits targeting protected files remain blocked.
+- This change does not alter network exfiltration, destructive SQL, service control, protected Git operations, device writes, or workspace escape rules.

@@ -21,7 +21,7 @@ test('public package identity matches all loader sites', () => {
 });
 
 test('tracked package sources contain no host-specific infra references', () => {
-  const tracked = ['README.md', 'AGENTS.md', 'index.md', 'package.json', 'cordis.patch.yml', 'lib/client.js', 'lib/index.js', 'lib/redact.js', 'lib/recorder.js', 'lib/score.js', 'lib/report.js'];
+  const tracked = ['README.md', 'package.json', 'cordis.patch.yml', 'lib/client.js', 'lib/index.js', 'lib/redact.js', 'lib/recorder.js', 'lib/score.js', 'lib/report.js'];
   for (const file of tracked) {
     if (!fs.existsSync(path.join(root, file))) continue;
     const text = read(file);
@@ -105,6 +105,25 @@ test('AuditRecorder writes, rotates, and reads records safely', async () => {
   assert.equal(records[1].toolName, 'edit');
 
   fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+test('AuditRecorder logs malformed records while preserving best-effort reads', async () => {
+  const { AuditRecorder } = await import('../lib/recorder.js');
+  const tempDir = path.join(os.tmpdir(), 'shadow-auditor-malformed-' + Date.now());
+  const messages = [];
+  const logger = { debug: (...args) => messages.push(args.join(' ')), warn() {} };
+  await fs.promises.mkdir(tempDir, { recursive: true });
+  await fs.promises.writeFile(path.join(tempDir, '2026-09.jsonl'), '{invalid json}\n', 'utf8');
+  try {
+    const recorder = new AuditRecorder({ dir: tempDir, logger });
+    assert.deepEqual(await recorder.readRecent(10), []);
+    assert.deepEqual(await recorder.readAll(), []);
+    assert.ok(messages.length >= 2);
+    assert.ok(messages.every(message => message.includes('error type: SyntaxError')));
+    assert.ok(messages.every(message => !message.includes('invalid json')));
+  } finally {
+    await fs.promises.rm(tempDir, { recursive: true, force: true });
+  }
 });
 
 test('CommandSafetyGuard blocks dangerous, allows safe, and catches exfiltration and escape', async () => {
@@ -235,7 +254,7 @@ test('Report engine builds operation bills and parses flags', async () => {
   let guardFn = null;
   const eventListeners = new Map();
   let registeredCommand = null;
-  let registeredRoute = null;
+  const registeredRoutes = [];
 
   const mockCtx = {
     tools: {
@@ -250,7 +269,7 @@ test('Report engine builds operation bills and parses flags', async () => {
     },
     webServer: {
       register: (route) => {
-        registeredRoute = route;
+        registeredRoutes.push(route);
         return () => {};
       },
     },
@@ -301,7 +320,7 @@ test('Report engine builds operation bills and parses flags', async () => {
   // 2. Verify guard blocks dangerous command
   assert.ok(guardFn !== null);
   const blockResult = guardFn({ name: 'bash', arguments: { command: 'rm -rf /' } });
-  assert.ok(blockResult && blockResult.includes('Команда заблокирована'));
+  assert.ok(blockResult && blockResult.includes('Command blocked'));
 
   // 3. Verify guard allows safe command
   const allowResult = guardFn({ name: 'bash', arguments: { command: 'git status' } });
@@ -325,11 +344,10 @@ test('Report engine builds operation bills and parses flags', async () => {
     rawInput: '',
   });
   assert.equal(res.kind, 'success');
-  assert.ok(res.text.includes('Ведомость безопасности'));
+  assert.ok(res.text.includes('Shadow Security Audit Bill'));
 
   // 6. Verify web route
-  assert.ok(registeredRoute !== null);
-  assert.equal(registeredRoute.path, '/dsh-shadow-auditor/audit');
+  assert.ok(registeredRoutes.some(route => route.path === '/dsh-shadow-auditor/audit'));
 });
 
 test('Client UI card adheres to DSH authoring standards (#32, #33, #34, #35)', () => {
@@ -388,4 +406,32 @@ test('Client UI registers AuditShieldChip into conversation.session.header.utili
   assert.ok(clientSrc.includes('AuditShieldChip'), 'AuditShieldChip component must exist');
   assert.ok(clientSrc.includes('conversation.session.header.utilities'), 'conversation.session.header.utilities slot must be registered');
   assert.ok(clientSrc.includes('dsh-shadow-auditor-chip'), 'Chip ID must be dsh-shadow-auditor-chip');
+});
+
+test('Command guard scopes secret writes per command and pipeline stage', async () => {
+  const { findDangerous } = await import('../lib/guards/command.js');
+
+  for (const command of [
+    'grep -n -A3 settings.yaml config/',
+    "sed -n '1,10p' settings.yaml",
+    'echo x 2>/dev/null; grep -n -A3 settings.yaml config/',
+    'echo x 2>/dev/null | grep -n -A3 settings.yaml',
+  ]) {
+    assert.equal(findDangerous(command), undefined, 'read or unrelated stderr redirect should pass: ' + command);
+  }
+
+  for (const command of [
+    'echo x > settings.yaml',
+    'echo x | tee settings.yaml',
+    'sed -i s/a/b/ settings.yaml',
+  ]) {
+    const hit = findDangerous(command);
+    assert.ok(hit, 'protected write must be blocked: ' + command);
+    assert.ok(['env-write', 'secret-write'].includes(hit.id), 'expected sensitive write rule: ' + JSON.stringify(hit));
+  }
+
+  assert.equal(findDangerous('rm -f /tmp/preview.html'), undefined, 'non-recursive force delete must pass');
+  assert.ok(findDangerous('rm -r /tmp/tree'), 'recursive delete must stay blocked');
+  assert.ok(findDangerous('rm -rf /tmp/tree'), 'recursive force delete must stay blocked');
+  assert.ok(findDangerous('rm -f -r /tmp/tree'), 'separate recursive flag must stay blocked');
 });

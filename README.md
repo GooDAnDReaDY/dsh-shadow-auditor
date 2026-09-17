@@ -202,9 +202,9 @@ dsh-shadow-auditor:
 
 MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
-## Unreleased changes for issue #56
+## Changes in v0.2.10
 
-This section describes the current branch candidate; package version 0.2.9 remains unchanged until an approved release.
+This release fixes two command-guard false positives, preserves recursive-delete and protected-file write protection, and adds safe debug diagnostics for best-effort failures.
 
 The command firewall allows rm -f when no recursive flag is present. It continues to block rm -r and rm -rf, including combined or split recursive flags. Protected-file write checks run separately for shell commands and pipeline stages, so a stderr redirect in one command cannot color a later read. Reading settings.yaml with grep, cat, or sed without in-place mode is allowed; writes through redirects, tee, or in-place edits remain blocked.
 

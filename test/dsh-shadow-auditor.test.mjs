@@ -107,6 +107,25 @@ test('AuditRecorder writes, rotates, and reads records safely', async () => {
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
 
+test('AuditRecorder logs malformed records while preserving best-effort reads', async () => {
+  const { AuditRecorder } = await import('../lib/recorder.js');
+  const tempDir = path.join(os.tmpdir(), 'shadow-auditor-malformed-' + Date.now());
+  const messages = [];
+  const logger = { debug: (...args) => messages.push(args.join(' ')), warn() {} };
+  await fs.promises.mkdir(tempDir, { recursive: true });
+  await fs.promises.writeFile(path.join(tempDir, '2026-09.jsonl'), '{invalid json}\n', 'utf8');
+  try {
+    const recorder = new AuditRecorder({ dir: tempDir, logger });
+    assert.deepEqual(await recorder.readRecent(10), []);
+    assert.deepEqual(await recorder.readAll(), []);
+    assert.ok(messages.length >= 2);
+    assert.ok(messages.every(message => message.includes('error type: SyntaxError')));
+    assert.ok(messages.every(message => !message.includes('invalid json')));
+  } finally {
+    await fs.promises.rm(tempDir, { recursive: true, force: true });
+  }
+});
+
 test('CommandSafetyGuard blocks dangerous, allows safe, and catches exfiltration and escape', async () => {
   const { findDangerous } = await import('../lib/guards/command.js');
   const blocked = [
@@ -235,7 +254,7 @@ test('Report engine builds operation bills and parses flags', async () => {
   let guardFn = null;
   const eventListeners = new Map();
   let registeredCommand = null;
-  let registeredRoute = null;
+  const registeredRoutes = [];
 
   const mockCtx = {
     tools: {
@@ -250,7 +269,7 @@ test('Report engine builds operation bills and parses flags', async () => {
     },
     webServer: {
       register: (route) => {
-        registeredRoute = route;
+        registeredRoutes.push(route);
         return () => {};
       },
     },
@@ -301,7 +320,7 @@ test('Report engine builds operation bills and parses flags', async () => {
   // 2. Verify guard blocks dangerous command
   assert.ok(guardFn !== null);
   const blockResult = guardFn({ name: 'bash', arguments: { command: 'rm -rf /' } });
-  assert.ok(blockResult && blockResult.includes('Команда заблокирована'));
+  assert.ok(blockResult && blockResult.includes('Command blocked'));
 
   // 3. Verify guard allows safe command
   const allowResult = guardFn({ name: 'bash', arguments: { command: 'git status' } });
@@ -325,11 +344,10 @@ test('Report engine builds operation bills and parses flags', async () => {
     rawInput: '',
   });
   assert.equal(res.kind, 'success');
-  assert.ok(res.text.includes('Ведомость безопасности'));
+  assert.ok(res.text.includes('Shadow Security Audit Bill'));
 
   // 6. Verify web route
-  assert.ok(registeredRoute !== null);
-  assert.equal(registeredRoute.path, '/dsh-shadow-auditor/audit');
+  assert.ok(registeredRoutes.some(route => route.path === '/dsh-shadow-auditor/audit'));
 });
 
 test('Client UI card adheres to DSH authoring standards (#32, #33, #34, #35)', () => {

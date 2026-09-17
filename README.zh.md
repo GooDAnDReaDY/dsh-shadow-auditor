@@ -163,9 +163,9 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 
 MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
-## 未发布变更：issue #56
+## v0.2.10 变更
 
-本节描述当前分支候选行为；包版本 0.2.9 在获准发布前保持不变。
+本版本修复两种命令防护误报，保留递归删除和受保护文件写入防护，并为尽力而为的失败添加安全调试诊断。
 
 当没有递归标志时，命令防火墙允许 rm -f；仍会拦截 rm -r、rm -rf，以及组合或分开的递归标志。受保护文件写入检查按 shell 命令和管道阶段分别执行，因此前一条命令的 stderr 重定向不会误影响后续读取。使用 grep、cat 或非原地 sed 读取 settings.yaml 可以通过；重定向、tee 和原地编辑等写入仍会拦截。
 

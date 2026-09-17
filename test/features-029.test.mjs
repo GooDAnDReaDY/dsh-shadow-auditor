@@ -138,7 +138,7 @@ test('Client UI: 100% Locale Key Parity (en + zh) and Zero Russian in code', () 
   }
 });
 
-test('Package & Distribution Hygiene: v0.2.9 file limits, no AGENTS.md, no index.md', () => {
+test('Package & Distribution Hygiene: v0.2.9 file limits and internal-file exclusion', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   assert.equal(pkg.version, '0.2.9', 'Version must be 0.2.9');
 
@@ -146,8 +146,8 @@ test('Package & Distribution Hygiene: v0.2.9 file limits, no AGENTS.md, no index
   assert.ok(Array.isArray(pkg.files));
   assert.ok(!pkg.files.includes('AGENTS.md'), 'AGENTS.md must not be in files');
   assert.ok(!pkg.files.includes('index.md'), 'index.md must not be in files');
-  assert.ok(!fs.existsSync(path.join(root, 'AGENTS.md')), 'AGENTS.md must not exist in tracked tree');
-  assert.ok(!fs.existsSync(path.join(root, 'index.md')), 'index.md must not exist in tracked tree');
+  assert.ok(fs.existsSync(path.join(root, 'AGENTS.md')), 'project workflow instructions must exist in the repository');
+  assert.ok(fs.existsSync(path.join(root, 'index.md')), 'project navigation index must exist in the repository');
 
   // Verify all files in package are under 256 KiB
   const maxBytes = 256 * 1024;

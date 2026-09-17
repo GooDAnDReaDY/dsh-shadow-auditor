@@ -162,3 +162,11 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 ## 📄 开源协议
 
 MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
+
+## 未发布变更：issue #56
+
+本节描述当前分支候选行为；包版本 0.2.9 在获准发布前保持不变。
+
+当没有递归标志时，命令防火墙允许 rm -f；仍会拦截 rm -r、rm -rf，以及组合或分开的递归标志。受保护文件写入检查按 shell 命令和管道阶段分别执行，因此前一条命令的 stderr 重定向不会误影响后续读取。使用 grep、cat 或非原地 sed 读取 settings.yaml 可以通过；重定向、tee 和原地编辑等写入仍会拦截。
+
+分析器会识别引号和转义分隔符。这些改动不改变网络、SQL、服务控制、受保护 Git、设备写入或工作区逃逸规则。命令检查是有界分析，并非完整 Bash AST。

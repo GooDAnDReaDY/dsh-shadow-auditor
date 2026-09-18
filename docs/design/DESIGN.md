@@ -124,3 +124,19 @@
 - Secret and environment write checks run independently on commands separated by semicolon, &&, ||, pipe, and newlines. Quoted or escaped separators do not split the text.
 - Reading settings.yaml with grep, cat, or sed without -i is allowed. Redirection, tee, and in-place edits targeting protected files remain blocked.
 - This change does not alter network exfiltration, destructive SQL, service control, protected Git operations, device writes, or workspace escape rules.
+
+## 14. Native DSH Design Tokens & Route Security (#49, #52, #55)
+
+- **Strict Theme Variable Conformance**:
+  - All hex colors and raw `rgba(...)` instances in `lib/client.js` are replaced with native DSH CSS custom properties:
+    - Success states: `var(--dsw-alias-state-success-primary)` and `color-mix(in srgb, var(--dsw-alias-state-success-primary) 8%, transparent)`.
+    - Warning states: `var(--dsw-alias-state-warning-primary)` and `color-mix(in srgb, var(--dsw-alias-state-warning-primary) 8%, transparent)`.
+    - Error / Danger states: `var(--dsw-alias-state-error-primary)` and `color-mix(in srgb, var(--dsw-alias-state-error-primary) 8%, transparent)`.
+    - Brand / Action states: `var(--dsw-alias-state-brand-primary)`.
+    - Elevations & Borders: `var(--dsw-alias-shadow-l2)`, `var(--dsw-alias-border-l2)`, `var(--dsw-alias-bg-layer-2)`, `var(--dsw-alias-bg-layer-3)`.
+- **HTTP Endpoint Security & Method Restrictions**:
+  - All audit endpoints (`/dsh-shadow-auditor/audit`, `/events`, `/export`) strictly enforce HTTP `GET`/`HEAD` methods, responding with `405 Method Not Allowed` on other verbs.
+  - Fail-closed caller verification via `isTrustedRequest` validates Loopback IP, `sec-fetch-site: same-origin`, Bearer auth, or valid session cookie. Untrusted callers receive `403 Forbidden`.
+  - Exported configuration data is sanitized via `sanitizeExportConfig` to prevent exposure of internal or sensitive patterns.
+- **Client Locale Lifecycle**:
+  - UI locale dictionaries (`en` and `zh`) are registered inside `ctx.effect` with an explicit undo disposer for clean re-mount and hot-reload behavior.

@@ -203,7 +203,7 @@ test('Score engine calculates risk tags and cumulative penalties', async () => {
   ];
   const cum = applyCumulative(40, ['network-egress'], history, now);
   assert.ok(cum.score > 40);
-  assert.ok(cum.extraReasons.some(r => r.includes('часто повторяется')));
+  assert.ok(cum.extraReasons.some(r => r.includes('repeated frequently')));
 
   // Consecutive high risk penalty
   const highHistory = [
@@ -211,7 +211,7 @@ test('Score engine calculates risk tags and cumulative penalties', async () => {
   ];
   const cumHigh = applyCumulative(70, ['destructive'], highHistory, now);
   assert.equal(cumHigh.score, 80);
-  assert.ok(cumHigh.extraReasons.some(r => r.includes('Повторный вызов с высоким риском')));
+  assert.ok(cumHigh.extraReasons.some(r => r.includes('Consecutive high-risk')));
 });
 
 test('Report engine builds operation bills and parses flags', async () => {
@@ -223,8 +223,8 @@ test('Report engine builds operation bills and parses flags', async () => {
   assert.ok(flags.since > 0);
 
   const records = [
-    { time: '2026-09-03T10:00:00Z', toolName: 'bash', score: 65, tags: ['credential-read'], reasons: ['тест'] },
-    { time: '2026-09-03T10:05:00Z', toolName: 'bash', score: 10, tags: ['benign'], reasons: ['штатно'] },
+    { time: '2026-09-03T10:00:00Z', toolName: 'bash', score: 65, tags: ['credential-read'], reasons: ['test-credential'] },
+    { time: '2026-09-03T10:05:00Z', toolName: 'bash', score: 10, tags: ['benign'], reasons: ['benign-call'] },
     { time: '2026-09-03T10:10:00Z', toolName: 'bash', score: 95, tags: ['destructive'], blockedByGuard: 'rm -rf' },
   ];
 
@@ -434,4 +434,15 @@ test('Command guard scopes secret writes per command and pipeline stage', async 
   assert.ok(findDangerous('rm -r /tmp/tree'), 'recursive delete must stay blocked');
   assert.ok(findDangerous('rm -rf /tmp/tree'), 'recursive force delete must stay blocked');
   assert.ok(findDangerous('rm -f -r /tmp/tree'), 'separate recursive flag must stay blocked');
+});
+
+test('lib/ sources contain zero Cyrillic characters', () => {
+  const libFiles = fs.readdirSync(path.join(root, 'lib'), { recursive: true })
+    .filter(f => typeof f === 'string' && f.endsWith('.js'));
+  for (const f of libFiles) {
+    const fullPath = path.join(root, 'lib', f);
+    const content = fs.readFileSync(fullPath, 'utf8');
+    const matches = content.match(/[\u0400-\u04FF]/g);
+    assert.ok(!matches, 'File lib/' + f + ' contains Cyrillic characters: ' + (matches ? matches.length : 0));
+  }
 });

@@ -140,3 +140,15 @@
   - Exported configuration data is sanitized via `sanitizeExportConfig` to prevent exposure of internal or sensitive patterns.
 - **Client Locale Lifecycle**:
   - UI locale dictionaries (`en` and `zh`) are registered inside `ctx.effect` with an explicit undo disposer for clean re-mount and hot-reload behavior.
+
+
+## 15. Export Hygiene and Audit Record Visibility (#54, #60)
+
+- **Diff Gate vs. Full File Inspection (`scanFileContent`)**:
+  - `scanFileContent` in `lib/diff-gate/gate.js` is wired directly into production write guards (`lib/index.js`). Non-diff plain text file write payloads are evaluated through `scanFileContent` while patch diffs run through `scanDiff`, guaranteeing secret scanning, SAST, and prompt injection detection on all write surfaces.
+- **Dead Export Purge (`isTrustedReadRequest`)**:
+  - Unused dead export `isTrustedReadRequest` in `lib/updater.js` removed; read endpoints use the canonical `isTrustedRequest` helper.
+- **Audit Persistence Visibility & Error Handling**:
+  - `AuditRecorder` tracks `recordErrors` and `unreadableCount`, surfaced via `recorder.getStats()`.
+  - Failed `record()` executions are explicitly caught and logged to `logger.warn`, preventing silent audit loss.
+  - All intentional empty suppressions in cleanup/unregistration paths carry explicit `/* intentional: best-effort ... */` code annotations.

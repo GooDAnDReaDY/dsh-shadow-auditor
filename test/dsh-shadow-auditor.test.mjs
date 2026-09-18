@@ -121,10 +121,37 @@ test('AuditRecorder logs malformed records while preserving best-effort reads', 
     assert.ok(messages.length >= 2);
     assert.ok(messages.every(message => message.includes('error type: SyntaxError')));
     assert.ok(messages.every(message => !message.includes('invalid json')));
+    assert.strictEqual(recorder.getStats().unreadableCount, 2);
   } finally {
     await fs.promises.rm(tempDir, { recursive: true, force: true });
   }
 });
+
+test('AuditRecorder tracks recordErrors on append failure and logs warning', async () => {
+  const { AuditRecorder } = await import('../lib/recorder.js');
+  const tempDir = path.join(os.tmpdir(), 'shadow-auditor-write-fail-' + Date.now());
+  const warnings = [];
+  const logger = { debug() {}, warn: (...args) => warnings.push(args.join(' ')) };
+  await fs.promises.mkdir(tempDir, { recursive: true });
+  const recorder = new AuditRecorder({ dir: tempDir, logger });
+  const targetFile = recorder.monthFile(Date.now());
+  await fs.promises.mkdir(targetFile, { recursive: true });
+  try {
+    let thrown = null;
+    try {
+      await recorder.record({ time: Date.now(), action: 'test' });
+    } catch (err) {
+      thrown = err;
+    }
+    assert.ok(thrown !== null, 'record() should throw when write fails');
+    assert.strictEqual(recorder.getStats().recordErrors, 1);
+    assert.ok(warnings.length >= 1);
+    assert.ok(warnings[0].includes('Failed to write audit event to persistent log (total errors: 1)'));
+  } finally {
+    await fs.promises.rm(tempDir, { recursive: true, force: true });
+  }
+});
+
 
 test('CommandSafetyGuard blocks dangerous, allows safe, and catches exfiltration and escape', async () => {
   const { findDangerous } = await import('../lib/guards/command.js');

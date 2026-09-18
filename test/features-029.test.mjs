@@ -150,9 +150,9 @@ test('Client UI: 100% Locale Key Parity (en + zh) and Zero Russian in code', () 
   }
 });
 
-test('Package & Distribution Hygiene: v0.2.10 file limits and internal-file exclusion', () => {
+test('Package & Distribution Hygiene: v0.2.11 file limits and internal-file exclusion', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  assert.equal(pkg.version, '0.2.10', 'Version must be 0.2.10');
+  assert.equal(pkg.version, '0.2.11', 'Version must be 0.2.11');
 
   // Strict whitelist in package.json files
   assert.ok(Array.isArray(pkg.files));

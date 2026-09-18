@@ -202,6 +202,17 @@ dsh-shadow-auditor:
 
 MIT © [GooDAnDReaDY](https://github.com/GooDAnDReaDY)
 
+## Changes in v0.2.11
+- English & Chinese standardization for all score findings with 0 Cyrillic in codebase (#47)
+- Host-side one-click updater endpoint and settings banner (#48)
+- Hardened HTTP routes enforcing GET method and fail-closed caller verification (#49)
+- Internal planning documents untracked from repository and npm bundle (#50)
+- Purged stale release tarballs from working tree (#51)
+- Converted all hex and raw rgba styling to native DSH CSS design tokens (#52)
+- Declared required client module injection contracts in package.json (#53)
+- Tracked persistent audit record errors and unreadable log entry counters (#54)
+- Safe lifecycle locale registration with ctx.effect and undo disposal (#55)
+
 ## Changes in v0.2.10
 
 This release fixes two command-guard false positives, preserves recursive-delete and protected-file write protection, and adds safe debug diagnostics for best-effort failures.

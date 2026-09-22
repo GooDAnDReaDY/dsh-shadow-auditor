@@ -2,6 +2,11 @@
 
 All notable changes to `@goodandready/dsh-shadow-auditor` are documented in this file.
 
+## 0.2.14
+
+### Fixed
+- The settings card no longer waits for the removed `settingsScope` service. It uses `configForms` on current DeepSeek Harness (#74).
+
 ## [0.2.13] - 2026-09-19
 
 ### Fixed

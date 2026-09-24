@@ -1,3 +1,4 @@
+import os from 'node:os';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { findDangerous, checkDestructiveDeletion } from '../lib/guards/command.js';
@@ -49,4 +50,30 @@ test('Destructive Delete: allows non-recursive and safe commands without false p
   assert.strictEqual(findDangerous('git status'), undefined);
   assert.strictEqual(findDangerous('grep -i "Remove-Item" script.ps1'), undefined);
   assert.strictEqual(findDangerous('cat ./rd/notes.txt'), undefined);
+});
+
+test('Destructive Delete: unconditionally blocks deletion of protected system prefixes (#105)', () => {
+  const ws = '/home/user/project';
+  const home = os.homedir();
+
+  const hit1 = findDangerous('rm -rf ~/.dsh', { workspace: ws });
+  assert.ok(hit1);
+  assert.strictEqual(hit1.id, 'destructive-delete-protected-prefix');
+
+  const hit2 = findDangerous('rm -rf ~/.claude/session', { workspace: ws });
+  assert.ok(hit2);
+  assert.strictEqual(hit2.id, 'destructive-delete-protected-prefix');
+
+  const hit3 = findDangerous('Remove-Item -Recurse ~/.ssh', { workspace: ws });
+  assert.ok(hit3);
+  assert.strictEqual(hit3.id, 'destructive-delete-protected-prefix');
+
+  const hit4 = findDangerous('rm -rf /etc/hosts', { workspace: ws });
+  assert.ok(hit4);
+  assert.strictEqual(hit4.id, 'destructive-delete-protected-prefix');
+
+  // Even if workspace is home directory itself, ~/.dsh is protected!
+  const hit5 = findDangerous('rm -rf .dsh', { workspace: home });
+  assert.ok(hit5);
+  assert.strictEqual(hit5.id, 'destructive-delete-protected-prefix');
 });

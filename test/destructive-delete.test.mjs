@@ -77,3 +77,66 @@ test('Destructive Delete: unconditionally blocks deletion of protected system pr
   assert.ok(hit5);
   assert.strictEqual(hit5.id, 'destructive-delete-protected-prefix');
 });
+
+test('Destructive Delete: recognizes dry-run verification flags and allows them safely (#104)', () => {
+  const ws = '/home/user/project';
+
+  // 1. PowerShell -WhatIf and -Confirm pass without blocking
+  let psDryRun = null;
+  const psHit = findDangerous('Remove-Item -Recurse -Force -WhatIf C:\\Windows', {
+    workspace: ws,
+    onDryRun: (info) => { psDryRun = info; }
+  });
+  assert.strictEqual(psHit, undefined);
+  assert.ok(psDryRun);
+  assert.strictEqual(psDryRun.flag, '-WhatIf');
+
+  let psConfirm = null;
+  const psConfirmHit = findDangerous('Remove-Item -Recurse -Confirm $HOME', {
+    workspace: ws,
+    onDryRun: (info) => { psConfirm = info; }
+  });
+  assert.strictEqual(psConfirmHit, undefined);
+  assert.ok(psConfirm);
+  assert.strictEqual(psConfirm.flag, '-Confirm');
+
+  // 2. POSIX rm with --dry-run
+  let rmDryRun = null;
+  const rmHit = findDangerous('rm -rf --dry-run /tmp/tree', {
+    workspace: ws,
+    onDryRun: (info) => { rmDryRun = info; }
+  });
+  assert.strictEqual(rmHit, undefined);
+  assert.ok(rmDryRun);
+  assert.strictEqual(rmDryRun.flag, '--dry-run');
+
+  // 3. git clean with -n or --dry-run
+  let gitDryRun = null;
+  const gitHit1 = findDangerous('git clean -fdx -n', {
+    workspace: ws,
+    onDryRun: (info) => { gitDryRun = info; }
+  });
+  assert.strictEqual(gitHit1, undefined);
+  assert.ok(gitDryRun);
+
+  let gitDryRun2 = null;
+  const gitHit2 = findDangerous('git clean -ndx', {
+    workspace: ws,
+    onDryRun: (info) => { gitDryRun2 = info; }
+  });
+  assert.strictEqual(gitHit2, undefined);
+  assert.ok(gitDryRun2);
+
+  let gitDryRun3 = null;
+  const gitHit3 = findDangerous('git clean --dry-run -f', {
+    workspace: ws,
+    onDryRun: (info) => { gitDryRun3 = info; }
+  });
+  assert.strictEqual(gitHit3, undefined);
+  assert.ok(gitDryRun3);
+
+  // 4. Non-dry-run destructive commands must still be strictly blocked!
+  assert.ok(findDangerous('rm -rf /tmp/tree'));
+  assert.ok(findDangerous('Remove-Item -Recurse -Force C:\\Windows', { workspace: ws }));
+  assert.ok(findDangerous('git clean -fdx /', { workspace: ws }));
+});

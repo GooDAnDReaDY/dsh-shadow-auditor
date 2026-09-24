@@ -2,6 +2,19 @@
 
 All notable changes to `@goodandready/dsh-shadow-auditor` are documented in this file.
 
+## [0.2.15] - 2026-09-24
+
+### Added
+- **Destructive Deletion Workspace Guard (#103)**: Strictly block recursive deletions (`rm -rf`, PowerShell `Remove-Item -Recurse`, `rd /s`, `git clean -fdx`) targeting filesystem root (`/`, `~`, `.`) or paths resolving outside the session workspace.
+- **Critical System Prefix Protection (#105)**: Unconditional protection for sensitive system directories (`~/.dsh`, `~/.claude`, `~/.ssh`, `/etc`, `/usr`, `C:\Windows`), preventing deletion even when the session workspace is located in the home directory.
+- **Dry-Run Pass-Through Verification (#104)**: Recognize verification and preview flags (`-WhatIf`, `-Confirm`, `--dry-run`, `git clean -n`), allowing safe preview commands without triggering false-positive deletion blocks, while recording safety audits.
+
+### Fixed
+- **Diff Gate Unified Detection Heuristic (#65)**: Fixed false-positive `isUnifiedDiff` heuristic that misclassified regular files containing `@@` markers as diffs and bypassed security scans in `scanFileContent`.
+
+### Performance
+- **Diff Gate Large File Scan Optimization (#66)**: Hoisted diff heuristic outside the per-line loop in `scanDiff`, eliminating $O(N \cdot M)$ string operations and reducing 5000+ line diff scan latency from quadratic freeze to ~20ms.
+
 ## 0.2.14
 
 ### Fixed

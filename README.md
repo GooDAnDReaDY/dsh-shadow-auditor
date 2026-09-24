@@ -81,6 +81,9 @@ graph LR
 ### 2. 🛡️ Destructive Command Firewall (`lib/guards/command.js`)
 * Analyzes shell command AST and argument tokens before terminal execution;
 * Flags and blocks dangerous operations (unbounded `rm -rf`, disk wipes, fork bombs, destructive `dd`, accidental recursive permission overwrites);
+* Workspace boundary protection (#103): blocks recursive deletions targeting filesystem root or paths resolving outside session workspace;
+* Critical system prefix protection (#105): unconditionally safeguards sensitive directories (`~/.dsh`, `~/.claude`, `~/.ssh`, `/etc`, `/usr`, Windows system folders);
+* Dry-run verification pass-through (#104): recognizes preview flags (`-WhatIf`, `-Confirm`, `--dry-run`, `git clean -n`), permitting safe inspection without false-positive blocks;
 * Requires explicit user override for hazardous scripts.
 
 ### 3. 📋 Security Rules Engine & Live Dashboard (`lib/client.js`)

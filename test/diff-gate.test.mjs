@@ -92,3 +92,16 @@ test('Diff Gate: scanFileContent works on non-diff plain text', () => {
   const res = scanFileContent({ content, filePath: 'secret.js' });
   assert.ok(res.findings.some(f => f.ruleId === 'SEC-API-KEY'));
 });
+
+test('Diff Gate: scanFileContent correctly inspects all lines when content contains @@ markers (#65)', () => {
+  const content = `
+const secret1 = "sk-live-1234567890abcdef1234567890";
+// @@section header annotation or email like user@@domain.com
+const secret2 = "ghp_1234567890abcdefghijklmnopqrstuvwxyz1234";
+`;
+  const res = scanFileContent({ content, filePath: 'config.js' });
+  assert.strictEqual(res.findings.length, 2);
+  assert.strictEqual(res.findings[0].line, 2);
+  assert.strictEqual(res.findings[1].line, 4);
+  assert.ok(res.findings.every(f => f.ruleId === 'SEC-API-KEY'));
+});

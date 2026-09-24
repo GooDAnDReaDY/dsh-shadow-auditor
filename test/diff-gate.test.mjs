@@ -105,3 +105,15 @@ const secret2 = "ghp_1234567890abcdefghijklmnopqrstuvwxyz1234";
   assert.strictEqual(res.findings[1].line, 4);
   assert.ok(res.findings.every(f => f.ruleId === 'SEC-API-KEY'));
 });
+
+test('Diff Gate: scanning large diffs (5000+ lines) performs linearly without event-loop freeze (#66)', () => {
+  const header = `--- a/large.js\n+++ b/large.js\n@@ -1,1 +1,5000 @@\n`;
+  const lines = Array.from({ length: 5000 }, (_, idx) => idx === 2500 ? '+const apiKey = "sk-live-1234567890abcdef1234567890";' : `+const line${idx} = ${idx};`);
+  const diff = header + lines.join('\n');
+  const t0 = performance.now();
+  const res = scanDiff({ diffText: diff, filePath: 'large.js' });
+  const duration = performance.now() - t0;
+  assert.strictEqual(res.findings.length, 1);
+  assert.strictEqual(res.findings[0].line, 2501);
+  assert.ok(duration < 500, `Large diff scan must be fast (<500ms), took ${duration.toFixed(1)}ms`);
+});

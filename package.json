@@ -1,6 +1,6 @@
 {
   "name": "@goodandready/dsh-shadow-auditor",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "DSH plugin for background security audits, secret leakage detection, and command safety",
   "type": "module",
   "main": "lib/index.js",
@@ -56,6 +56,9 @@
     "@deepseek-ai/dsh-host-webserver": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-settings": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "devDependencies": {
     "@deepseek-ai/schemastery": "^3.18.1"
   }
 }

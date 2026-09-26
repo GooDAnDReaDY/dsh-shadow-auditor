@@ -179,3 +179,17 @@ test('Client UI registers all slots and dictionaries via ctx.effect with clean d
   assert.equal(uninjectCount, 4, 'All 4 injected slots must be disposed');
   assert.equal(unregisterCount, 4, 'All 4 registered slots must be disposed');
 });
+
+test('Settings card header is a keyboard-accessible button with proper ARIA attributes (#156)', () => {
+  const clientSrc = fs.readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8');
+
+  // Verify semantic button element and styling classes
+  assert.ok(clientSrc.includes("React.createElement('button', {"), 'Header must be a semantic button');
+  assert.ok(clientSrc.includes("className: 'sa-card-header-btn'"), 'Header must have sa-card-header-btn class');
+  assert.ok(clientSrc.includes("'aria-expanded': open"), 'Header must expose aria-expanded');
+  assert.ok(clientSrc.includes("'aria-controls': 'sa-settings-panel'"), 'Header must associate aria-controls with panel id');
+  assert.ok(clientSrc.includes("id: 'sa-settings-panel'"), 'Settings panel must have matching id');
+  assert.ok(clientSrc.includes("e.key === 'Enter' || e.key === ' '"), 'Header must handle Enter and Space keys');
+  assert.ok(clientSrc.includes('.sa-card-header-btn:focus-visible'), 'CSS must include focus-visible outline for keyboard focus');
+  assert.ok(clientSrc.includes('prefers-reduced-motion: reduce'), 'CSS must respect reduced motion preferences');
+});

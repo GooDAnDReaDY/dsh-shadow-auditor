@@ -32,17 +32,8 @@ test('Client UI: adheres to dsh-clinebot section card styling and design tokens'
   assert.ok(clientSrc.includes('--dsw-alias-label-primary'), 'Must use --dsw-alias-label-primary');
 });
 
-test('Plugin registration & Diff Gate tool: registers all 3 tools cleanly with proper schemas', async (t) => {
-  let plugin;
-  try {
-    plugin = await import('../lib/index.js');
-  } catch (err) {
-    if (err.code === 'ERR_MODULE_NOT_FOUND') {
-      t.skip('PeerDependency @deepseek-ai/schemastery not present in standalone unit test environment');
-      return;
-    }
-    throw err;
-  }
+test('Plugin registration & Diff Gate tool: registers all 3 tools cleanly with proper schemas', async () => {
+  const plugin = await import('../lib/index.js');
 
   const tools = [];
   const mockCtx = {

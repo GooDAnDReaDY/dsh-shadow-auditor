@@ -265,17 +265,8 @@ test('Report engine builds operation bills and parses flags', async () => {
   assert.ok(md.includes('session-123'));
   assert.ok(md.includes('High Risk Operations'));
   assert.ok(md.includes('Intercepted Commands'));
-});test('In-memory Cordis plugin composition: apply, tools, guard, telemetry and /audit command', async (t) => {
-  let plugin;
-  try {
-    plugin = await import('../lib/index.js');
-  } catch (err) {
-    if (err.code === 'ERR_MODULE_NOT_FOUND') {
-      t.skip('PeerDependency @deepseek-ai/schemastery not present in standalone unit test environment');
-      return;
-    }
-    throw err;
-  }
+});test('In-memory Cordis plugin composition: apply, tools, guard, telemetry and /audit command', async () => {
+  const plugin = await import('../lib/index.js');
 
   const registeredTools = [];
   let guardFn = null;

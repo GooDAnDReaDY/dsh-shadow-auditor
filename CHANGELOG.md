@@ -2,6 +2,19 @@
 
 All notable changes to `@goodandready/dsh-shadow-auditor` are documented in this file.
 
+## [0.2.16] - 2026-09-26
+
+### Security
+- **Hardened Endpoint Verification (`isTrustedRequest`) (#73)**: Strictly reject cross-site and same-site requests (`Sec-Fetch-Site: cross-site`, `same-site`) even when originating from loopback. Enforce exact matching for session Bearer and cookie tokens against expected secrets, while allowing safe same-origin WebUI card requests.
+- **Sanitized Distribution Mirroring (#50)**: Enhanced GitHub publishing script to strictly isolate internal documentation, plans, and design records from public mirror releases, ensuring only public product files and verified documents are distributed.
+
+### Added
+- **Keyboard-Accessible Settings Card Header (#156)**: Replaced non-semantic header element with a fully accessible interactive button (`role="button"`, `type="button"`, `tabIndex="0"`), ARIA state exposure (`aria-expanded`, `aria-controls`), Enter and Space key activation, `:focus-visible` focus ring, and reduced-motion styling.
+- **Deterministic Host-Contract Test Harness (#157)**: Introduced hermetic in-memory Cordis runtime harness (`test/harness.mjs`) and integration tests (`test/host-contract.test.mjs`) validating plugin lifecycle, tools, guards, web routes, commands, and telemetry boundaries deterministically without network prerequisites or skipped tests.
+
+### Fixed
+- **Client Slot Effect-Binding & Disposer Teardown (#121)**: Wrapped all UI slot injections and locale registrations inside Cordis `ctx.effect`, returning clean unbind disposers to prevent event listener and timer leaks across plugin hot-reloads.
+
 ## [0.2.15] - 2026-09-24
 
 ### Added

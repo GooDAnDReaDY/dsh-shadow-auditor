@@ -44,6 +44,7 @@ EXTRA_ALLOW=(
   "CHANGELOG.md"
   "package.json"
   "cordis.patch.yml"
+  "docs/design/DESIGN.md"
 )
 
 # Never publish these, even if they sneak into the allowlist.
@@ -54,6 +55,7 @@ FORBIDDEN=(
   ".gitea"
   ".worktrees"
   ".planning"
+  "docs/plans"
   "__pycache__"
   ".ruff_cache"
   ".venv"
@@ -62,12 +64,14 @@ FORBIDDEN=(
 
 mode=""
 gitea_ref=""
-for arg in "$@"; do
-  case "$arg" in
-    --check) mode="check" ;;
-    --push) mode="push" ;;
-    -*) echo "unknown option: $arg" >&2; exit 2 ;;
-    *) gitea_ref="$arg" ;;
+tag_name=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --check) mode="check"; shift ;;
+    --push) mode="push"; shift ;;
+    --tag) tag_name="$2"; shift 2 ;;
+    -*) echo "unknown option: $1" >&2; exit 2 ;;
+    *) gitea_ref="$1"; shift ;;
   esac
 done
 
@@ -177,6 +181,13 @@ new_commit="$(git commit-tree "$new_tree" -p "$mirror_sha" -m "chore(publish): s
 echo "new mirror commit: $new_commit"
 
 git push "$MIRROR_REMOTE" "$new_commit:refs/heads/$MIRROR_BRANCH"
+
+if [ -n "$tag_name" ]; then
+  echo "tagging mirror commit $new_commit with $tag_name..."
+  git tag -f "$tag_name" "$new_commit"
+  git push -f "$MIRROR_REMOTE" "refs/tags/$tag_name:refs/tags/$tag_name"
+  echo "mirror tag updated: $MIRROR_REMOTE/refs/tags/$tag_name -> $new_commit"
+fi
 
 echo
 echo "correspondence to record in the release notes:"

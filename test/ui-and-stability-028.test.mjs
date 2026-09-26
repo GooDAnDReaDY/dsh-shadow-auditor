@@ -98,3 +98,84 @@ test('Plugin registration & Diff Gate tool: registers all 3 tools cleanly with p
   assert.ok(result.findings.some(f => f.ruleId === 'SEC-API-KEY'), 'Tool must flag OpenAI key');
   assert.equal(result.action, 'warn');
 });
+
+test('Client UI registers all slots and dictionaries via ctx.effect with clean disposers (#121)', () => {
+  const clientSrc = fs.readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8');
+
+  // Verify static code structure adheres to effect-binding
+  assert.ok(clientSrc.includes("ctx.effect(() => {"), 'Must use ctx.effect');
+  assert.ok(clientSrc.includes("'dsh-shadow-auditor: client slots'"), 'Must label client slots effect');
+  assert.ok(clientSrc.includes("'dsh-shadow-auditor: locale dictionaries'"), 'Must label locale dictionaries effect');
+
+  // Verify dynamic execution and disposal
+  let loaded = null;
+  const mockWindow = {
+    __ModuleLoader__: {
+      load: (mod) => { loaded = mod; }
+    }
+  };
+  const mockReact = {
+    createElement: () => ({}),
+    useState: (init) => [init, () => {}],
+    useRef: () => ({ current: null }),
+    useEffect: () => {},
+    useCallback: (fn) => fn,
+  };
+  const fn = new Function('window', 'require', clientSrc);
+  fn(mockWindow, (id) => {
+    if (id === 'react') return mockReact;
+    return {};
+  });
+
+  const clientMod = loaded.factory((id) => {
+    if (id === 'react') return mockReact;
+    return {};
+  });
+
+  const effects = [];
+  const injectedSlots = [];
+  let uninjectCount = 0;
+  let unregisterCount = 0;
+
+  const mockCtx = {
+    effect: (effFn, label) => {
+      const disposer = effFn();
+      effects.push({ label, disposer });
+      return () => { if (typeof disposer === 'function') disposer(); };
+    },
+    slots: {
+      inject: (slotName, registerFn) => {
+        injectedSlots.push(slotName);
+        const unreg = registerFn();
+        return () => {
+          uninjectCount++;
+          if (typeof unreg === 'function') unreg();
+        };
+      },
+      register: (descriptor) => {
+        return () => {
+          unregisterCount++;
+        };
+      },
+    },
+    locale: {
+      register: () => () => {},
+    },
+  };
+
+  clientMod.apply(mockCtx);
+
+  assert.ok(effects.some(e => e.label === 'dsh-shadow-auditor: client slots'), 'Slots must be effect-bound');
+  assert.ok(effects.some(e => e.label === 'dsh-shadow-auditor: locale dictionaries'), 'Dictionaries must be effect-bound');
+  assert.equal(injectedSlots.length, 4, 'Must inject all 4 slots');
+
+  // Trigger teardown
+  for (const eff of effects) {
+    if (typeof eff.disposer === 'function') {
+      eff.disposer();
+    }
+  }
+
+  assert.equal(uninjectCount, 4, 'All 4 injected slots must be disposed');
+  assert.equal(unregisterCount, 4, 'All 4 registered slots must be disposed');
+});

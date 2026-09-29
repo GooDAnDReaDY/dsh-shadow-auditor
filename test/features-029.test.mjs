@@ -152,8 +152,9 @@ test('Client UI: 100% Locale Key Parity (en + zh) and Zero Russian in code', () 
 
 test('Package & Distribution Hygiene: file limits and internal-file exclusion', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-  // The version is pinned to the current release line; bump it with package.json.
-  assert.equal(pkg.version, '0.2.16', 'Version must be 0.2.16');
+  // Read the release line from package.json rather than pinning a literal here:
+  // a hardcoded copy breaks on every bump and says nothing about the package.
+  assert.match(pkg.version, /^\d+\.\d+\.\d+$/, 'version must be a release version, not a range or placeholder')
 
   // Strict whitelist in package.json files
   assert.ok(Array.isArray(pkg.files));

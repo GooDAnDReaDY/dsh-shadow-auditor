@@ -18,12 +18,15 @@ test('row seat key is the package name plus the row id from cordis.patch.yml', (
   assert.match(client, /const ROW_CONFIG_KEY = PKG \+ '#' \+ ROW_ID/)
 })
 
-test('settings register into plugins.row.config first, legacy seat stays as fallback', () => {
+test('settings register on the live seats and the retired one is gone', () => {
   const rowSeat = client.indexOf("name: 'plugins.row.config'")
-  const legacySeat = client.indexOf("name: 'settings.plugin.item'")
+  const listSeat = client.indexOf("name: 'plugins.item'")
   assert.ok(rowSeat > -1, 'row seat is registered')
-  assert.ok(legacySeat > -1, 'legacy seat is kept for older cores')
-  assert.ok(rowSeat < legacySeat, 'row seat goes first')
+  assert.ok(listSeat > -1, 'list seat is registered')
+  // settings.plugin.item was retired before DSH 0.1.7-rc.2: one occurrence in the
+  // whole 0.1.7-rc.2 tree against 54 of plugins.item. Keeping it as a fallback only
+  // registered the card a second time on a seat that no longer exists.
+  assert.equal(client.indexOf("name: 'settings.plugin.item'"), -1, 'retired seat must be gone')
   assert.match(client, /key: ROW_CONFIG_KEY/)
 })
 

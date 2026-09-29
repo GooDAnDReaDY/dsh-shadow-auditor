@@ -158,7 +158,9 @@ test('Client UI registers all slots and dictionaries via ctx.effect with clean d
 
   assert.ok(effects.some(e => e.label === 'dsh-shadow-auditor: client slots'), 'Slots must be effect-bound');
   assert.ok(effects.some(e => e.label === 'dsh-shadow-auditor: locale dictionaries'), 'Dictionaries must be effect-bound');
-  assert.equal(injectedSlots.length, 4, 'Must inject all 4 slots');
+  // plugins.item, plugins.row.config, conversation.session.header.utilities.
+  // settings.plugin.item was retired before DSH 0.1.7-rc.2 and is gone.
+  assert.equal(injectedSlots.length, 3, 'Must inject the 3 live slots');
 
   // Trigger teardown
   for (const eff of effects) {
@@ -167,8 +169,10 @@ test('Client UI registers all slots and dictionaries via ctx.effect with clean d
     }
   }
 
-  assert.equal(uninjectCount, 4, 'All 4 injected slots must be disposed');
-  assert.equal(unregisterCount, 4, 'All 4 registered slots must be disposed');
+  // 3 live seats, each disposed: plugins.item, plugins.row.config and
+  // conversation.session.header.utilities. The retired settings.plugin.item is gone.
+  assert.equal(uninjectCount, 3, 'all 3 injected slots must be disposed');
+  assert.equal(unregisterCount, 3, 'all 3 registered slots must be disposed');
 });
 
 test('Settings card header is a keyboard-accessible button with proper ARIA attributes (#156)', () => {

@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.19] - 2026-10-08
+
+### Security & Hardening
+- **Unwrap Before structuredClone (#169, #180, #183)**: Inverted configuration unwrap order (`plainConfig(Config(structuredClone(plainConfig(src))))`) to prevent `DataCloneError` on Schemastery Volatile boxes, eliminating fail-open guard bypasses.
+- **Zero-Leakage Invariant in Scanner & Evidence (#171, #172)**: Removed raw unmasked secrets from `scanSecrets` output hits. Masked passwords (`[REDACTED]`) and exfiltration tokens in SAST and prompt-injection finding `evidence`.
+- **ReDoS Protection & Regex Caching (#175)**: Implemented `getSafeRegExp` with LRU caching, pattern length limits, and rejection of catastrophic backtracking nested quantifiers in user-supplied command and path rules.
+- **Route Error Masking & Limit Clamping (#177, #178)**: Guarded against `NaN` parameters on `/events` and `/export`, returning sanitized generic JSON errors without leaking internal stack traces.
+
+### Fixed
+- **Audit Log Retention & Rotation Calculations (#168, #170)**: Converted `maxFileSizeMb` and `retentionDays` to positive numbers, fixing perpetual failure of log rotation caused by `NaN` calculations on Volatile boxes. Added dynamic `recorder.updateConfig` on `loader/volatile-update`.
+- **Tool-Name Matching False Positives (#173)**: Replaced broad substring matching with strict regex matchers (`isCommandTool`, `isFileReadTool`, `isFileWriteTool`), eliminating false positives on benign tools like `profile`, `list_fs`, `rewrite`.
+- **Turn Filter & Limit Slicing (#176, #69)**: Corrected `--turn` filter to evaluate in-flight and completed turns prior to applying `limit` slicing.
+- **Memory-Bounded Log Consumption (#174)**: Bounded memory consumption in `AuditRecorder.readAll()` with `maxRecords` cap and stream-level session filtering.
+- **Dead Code Cleanup (#179, #72)**: Removed duplicated `debugFailure` method definition in `AuditRecorder`.
+- **Façade Decoupling & Route Extraction (#182)**: Extracted HTTP routes into `lib/routes.js`, reducing `lib/index.js` to 468 lines (< 500 lines).
+
 ## 0.2.18
 
 ### Fixed

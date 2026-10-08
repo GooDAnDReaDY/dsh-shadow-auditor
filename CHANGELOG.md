@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.2.19] - 2026-10-08
+
+### Security & Hardening
+- **Unwrap Before structuredClone (#169, #180, #183)**: Inverted configuration unwrap order (`plainConfig(Config(structuredClone(plainConfig(src))))`) to prevent `DataCloneError` on Schemastery Volatile boxes, eliminating fail-open guard bypasses.
+- **Zero-Leakage Invariant in Scanner & Evidence (#171, #172)**: Removed raw unmasked secrets from `scanSecrets` output hits. Masked passwords (`[REDACTED]`) and exfiltration tokens in SAST and prompt-injection finding `evidence`.
+- **ReDoS Protection & Regex Caching (#175)**: Implemented `getSafeRegExp` with LRU caching, pattern length limits, and rejection of catastrophic backtracking nested quantifiers in user-supplied command and path rules.
+- **Route Error Masking & Limit Clamping (#177, #178)**: Guarded against `NaN` parameters on `/events` and `/export`, returning sanitized generic JSON errors without leaking internal stack traces.
+
+### Fixed
+- **Audit Log Retention & Rotation Calculations (#168, #170)**: Converted `maxFileSizeMb` and `retentionDays` to positive numbers, fixing perpetual failure of log rotation caused by `NaN` calculations on Volatile boxes. Added dynamic `recorder.updateConfig` on `loader/volatile-update`.
+- **Tool-Name Matching False Positives (#173)**: Replaced broad substring matching with strict regex matchers (`isCommandTool`, `isFileReadTool`, `isFileWriteTool`), eliminating false positives on benign tools like `profile`, `list_fs`, `rewrite`.
+- **Turn Filter & Limit Slicing (#176, #69)**: Corrected `--turn` filter to evaluate in-flight and completed turns prior to applying `limit` slicing.
+- **Memory-Bounded Log Consumption (#174)**: Bounded memory consumption in `AuditRecorder.readAll()` with `maxRecords` cap and stream-level session filtering.
+- **Dead Code Cleanup (#179, #72)**: Removed duplicated `debugFailure` method definition in `AuditRecorder`.
+- **Façade Decoupling & Route Extraction (#182)**: Extracted HTTP routes into `lib/routes.js`, reducing `lib/index.js` to 468 lines (< 500 lines).
+
+## 0.2.18
+
+### Fixed
+- **Peer gate on DSH 0.2.0-rc.1** (#58): the bundle was skipped at profile startup because its `peerDependencies` excluded the running version.
+- **Settings card served no form**: `NS` was the package name rather than the profile entry id, `Config` declared no `.volatile()` field, and `getConfig` handed out `Volatile` boxes. Both 0.1.7-rc.2 and 0.2.0 now serve and read the form.
+- **A saved setting never took effect**: the host applied changes through `settings.register` and `scope.watch`, neither of which exists in either release. Changes are applied on `loader/volatile-update` now.
+- **`settings.plugin.item` registration removed**: retired before DSH 0.1.7-rc.2, so it only registered the card a second time on a seat that no longer exists.
+
+## 0.2.17
+
+### Fixed
+- **Peer gate on DSH 0.2.0-rc.1** (#58): DSH skips a profile bundle whose `peerDependencies` exclude the running version, so this plugin was absent from the profile with no error in the UI. Every `@deepseek-ai/dsh-*` peer now names both the 0.1.7-rc.2 and 0.2.0-rc.1 lines, because semver does not admit a prerelease of the next minor into a range that does not name it.
+
 All notable changes to `@goodandready/dsh-shadow-auditor` are documented in this file.
 
 ## [0.2.16] - 2026-09-26

@@ -152,3 +152,34 @@
   - `AuditRecorder` tracks `recordErrors` and `unreadableCount`, surfaced via `recorder.getStats()`.
   - Failed `record()` executions are explicitly caught and logged to `logger.warn`, preventing silent audit loss.
   - All intentional empty suppressions in cleanup/unregistration paths carry explicit `/* intentional: best-effort ... */` code annotations.
+
+## 16. Audit Stabilization & Hardening Architecture (#168-#183)
+
+### 16.1 Config Unwrapping & Volatile Box Preservation (#169, #180, #183)
+- **Unwrap Order**: To prevent `DataCloneError: () => current could not be cloned` from Schemastery Volatile boxes, configuration is unwrapped via `plainConfig` prior to `structuredClone`, following `Config(structuredClone(plainConfig(src)))`.
+- **Single Assignment**: Removed dead initial `getConfig` assignment in `lib/index.js`, maintaining a resilient fallback `readConfig` function that survives box deserialization.
+
+### 16.2 Bounded Retention & Dynamic Size Configuration (#168, #170)
+- **Safe Numeric Parsing**: `AuditRecorder` strictly converts `maxFileSizeMb` and `retentionDays` using `Number()` with safe positive fallbacks (50 MB, 30 days), preventing `NaN` evaluation on `??` operator against Volatile boxes.
+- **Dynamic Reconfiguration**: Added `recorder.updateConfig({ maxFileSizeMb, retentionDays })` executed on `loader/volatile-update` events, ensuring live changes from UI cards apply immediately to disk retention logic without service restart.
+
+### 16.3 Zero-Leakage Invariant in Scanner & Findings Evidence (#171, #172)
+- **Sanitized Diff Findings**: Removed raw cleartext `raw: val.slice(0, 80)` attribute from `scanSecrets` hits in `lib/guards/secrets.js`.
+- **Masked SAST & Prompt-Injection Evidence**: Hardcoded passwords (`SAST-HARDCODED-PASS-001`) and embedded tokens in `lib/diff-gate/sast.js` and `prompt-injection.js` are redacted in the generated `evidence` line, guaranteeing that no plaintext secrets leak into persistent JSONL or `/audit` HTTP output.
+
+### 16.4 Precise Tool Matching & False-Positive Elimination (#173)
+- Replaced broad substring matching (`name.includes('file')`, `name.includes('write')`) with strict regex matching (`isCommandTool`, `isFileReadTool`, `isFileWriteTool`).
+- Tools such as `profile`, `list_fs`, `rewrite` are excluded from false-positive interception.
+
+### 16.5 Safe Regex Compilation & ReDoS Guard (#175)
+- User-supplied patterns in `customBlockedCommands` and `sensitivePathPatterns` are validated and cached in an LRU Map via `getSafeRegExp`.
+- Patterns exceeding 256 characters or containing catastrophic nested quantifiers are rejected with debug diagnostics.
+
+### 16.6 Memory-Bounded Log Consumption & Inverted Turn Filter Fix (#174, #176, #69)
+- `AuditRecorder.readAll(options)` bounds memory consumption via `maxRecords` and stream-level `sessionId` filtering.
+- `buildBill` filters by `since` and `turnEnds` prior to applying `limit` slicing. The turn window filter evaluates both in-flight turns (`time > lastEnd`) and completed turns (`prevEnd < time <= lastEnd`).
+
+### 16.7 HTTP Route Decoupling & Façade Hygiene (#177, #178, #179, #182)
+- Extracted HTTP routes (`/dsh-shadow-auditor/audit`, `/events`, `/export`) and trusted request verifiers into `lib/routes.js`, reducing `lib/index.js` to strictly < 500 lines.
+- `/events` and `/export` query parameters (`limit`) are clamped against `NaN` with `[1, 200]` and `[1, 5000]` boundaries. Uncaught errors in `/export` return sanitized `{ error: 'Failed to generate audit export' }` rather than leaking internal exception messages.
+- Removed duplicated `debugFailure` method definition in `AuditRecorder`.

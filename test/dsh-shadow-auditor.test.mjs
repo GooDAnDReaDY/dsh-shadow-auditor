@@ -21,7 +21,7 @@ test('public package identity matches all loader sites', () => {
 });
 
 test('tracked package sources contain no host-specific infra references', () => {
-  const tracked = ['README.md', 'package.json', 'cordis.patch.yml', 'lib/client.js', 'lib/index.js', 'lib/redact.js', 'lib/recorder.js', 'lib/score.js', 'lib/report.js'];
+  const tracked = ['README.md', 'package.json', 'cordis.patch.yml', 'lib/client.js', 'lib/index.js', 'lib/redact.js', 'lib/recorder.js', 'lib/routes.js', 'lib/score.js', 'lib/report.js'];
   for (const file of tracked) {
     if (!fs.existsSync(path.join(root, file))) continue;
     const text = read(file);

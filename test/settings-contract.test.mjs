@@ -46,7 +46,9 @@ test('volatile boxes unwrap to the plain values the host reads', () => {
   const keys = volatileKeys()
   assert.ok(keys.length > 0)
   const first = keys[0]
-  const raw = Config({ [first]: typeof Config({})[first] === 'boolean' ? false : 42 })
+  const defaultVal = plainConfig(Config({}))[first]
+  const testVal = typeof defaultVal === 'boolean' ? !defaultVal : 42
+  const raw = Config({ [first]: testVal })
   assert.equal(typeof raw[first].get, 'function', 'a volatile field holds a Volatile box')
   const plain = plainConfig(raw)
   assert.notEqual(typeof plain[first], 'object', 'plainConfig must yield a value, not a box')

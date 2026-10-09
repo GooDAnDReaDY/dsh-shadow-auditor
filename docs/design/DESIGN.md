@@ -214,3 +214,33 @@
 - **Skip Redundant Pass**: If `segments.length <= 1`, per-stage checks are omitted since the full-command pass already evaluated all patterns.
 - **Global vs. Stage Separation**: Global rules (`checkWorkspaceEscape`, `checkProtectedForcePush`) execute once on the composite command rather than repeating per pipeline segment.
 - **Custom Pattern Caching**: Pre-compiles and caches custom regex blocklists using `getSafeRegExp` LRU cache.
+
+## 18. Lifecycle Hooks & Interception Engine (#108, #109, #110, #111, #124, #125)
+
+### 18.1 Guaranteed Priority Hook Registration via `prepend` (#125)
+- All security-critical lifecycle event listeners (`tools/guard`, `tools/pre-execute`, `tools/post-execute`, `agent/pre-step`) are registered with `{ prepend: true }`.
+- Guarantees execution at the head of the Cordis handler pipeline before third-party extension handlers execute.
+
+### 18.2 Unconditional Critical Threat Blocking (`secretBlockCritical`) (#124)
+- Introducing `secretBlockCritical: boolean` (default: `true`) in plugin configuration schema.
+- When enabled, high-severity destructive system commands (e.g. root filesystem destruction, disk formatting) and critical credential leaks unconditionally trigger a hard block (`status: blocked`), completely bypassing lenient audit-only modes (`shellGuardMode: 'audit_only'`, `diffGateMode: 'warning'`).
+
+### 18.3 DSH User Approval Integration & `ask` Mode (#108)
+- On suspicious commands or elevated risks where `shellGuardMode` or `approvalMode` is configured for user interactive confirmation, returns `{ kind: 'ask', reason, displayReason }` in `tools/pre-execute`.
+- Seamlessly interoperates with `ctx.approval` (`ApprovalService`) if available, presenting an interactive authorization prompt before dispatch.
+
+### 18.4 Multi-Surface Lifecycle Interception Architecture (#109)
+- Comprehensive multi-surface coverage spanning all four operational boundaries:
+  1. `agent/pre-step`: Inspects user prompt payloads before LLM step execution.
+  2. `tools/pre-execute` / `tools.guard`: Validates tool dispatch and command parameters.
+  3. `tools/post-execute`: Sanitizes execution outcomes and command outputs.
+  4. `tools/result`: Lossless persistent telemetry and risk evaluation tracking.
+
+### 18.5 Pre-Filtering Incoming User Prompts (`agent/pre-step`) (#110)
+- Scans incoming message content blocks on `agent/pre-step` for prompt-injection, adversarial jailbreaks, and system override attempts.
+- Rejection halts execution early (`{ kind: 'reject' }`), preventing adversarial payloads from entering model context.
+
+### 18.6 Tool Result Sanitization & Output Redaction (`tools/post-execute`) (#111)
+- Intercepts raw tool outputs in `tools/post-execute`.
+- Inspects text content blocks for exposed high-entropy secrets and sensitive infrastructure tokens.
+- Automatically redacts identified secrets using `maskSecret()` before model context ingestion, returning `{ kind: 'accept', content: sanitizedBlocks }`.

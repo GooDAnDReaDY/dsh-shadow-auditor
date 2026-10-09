@@ -85,6 +85,13 @@ graph LR
 * 关键系统路径保护 (#105)：无条件保护敏感核心目录 (`~/.dsh`, `~/.claude`, `~/.ssh`, `/etc`, `/usr`, Windows 系统目录)；
 * 试运行标志放行 (#104)：自动识别预检标志 (`-WhatIf`, `-Confirm`, `--dry-run`, `git clean -n`)，允许安全预检而无需触发误拦截。
 
+### 3. 🪝 多阶段生命周期拦截引擎 (`lib/guards/lifecycle-hooks.js`)
+* **优先拦截注册 (`prepend: true`)** (#125)：确保安全钩子位于 Cordis 处理器队列首位，先于第三方插件执行；
+* **无条件严重威胁阻断 (`secretBlockCritical`)** (#124)：针对系统根破坏、磁盘格式化、AWS及私钥外发等高危行为，即使处于 `audit_only` 或 `warning` 模式亦强制阻断；
+* **用户交互审批模式 (`ask`)** (#108)：在 `tools/pre-execute` 阶段与 DSH 审批机制无缝联动，高危操作返回 `{ kind: 'ask', reason, displayReason }` 请求用户确认；
+* **用户输入提示词前置过滤 (`agent/pre-step`)** (#110)：在大模型处理前扫描用户消息，及时拦截 Prompt 注入与越狱攻击 (`{ kind: 'reject' }`)；
+* **工具执行结果脱敏与净化 (`tools/post-execute`)** (#111)：拦截工具输出并在注入模型上下文前自动掩码敏感凭据与高熵机密。
+
 ---
 
 ## 📦 安装指南

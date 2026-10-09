@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.20] - 2026-10-09
+
+### Security & Hardening
+- **Homoglyph & Zero-Width Normalization (#82)**: Neutralized invisible Unicode zero-width characters and Cyrillic/Greek homoglyphs before evaluation in CommandGuard.
+- **Hidden Base64 Payload Inspection (#83)**: Recursive decoding and deep scanning of hidden Base64 payloads (UTF-8 and UTF-16LE encoded commands).
+- **PowerShell & cmd.exe Destructive Pattern Hardening (#106)**: Added detection patterns for Windows-specific destructive commands (`Remove-Item`, `Format-Volume`, `Stop-Computer`, `rd /s /q`, `del /f /q`, `vssadmin delete shadows`).
+- **Static Environment Variable Path Expansion (#107)**: Expanded Windows and Unix environment variable tokens (`$HOME`, `~/`, `%USERPROFILE%`, `%TEMP%`, `$env:*`) during protected prefix checks.
+- **Embedded URL Credentials Interception & Masking (#81)**: Intercepted and redacted basic auth credentials embedded in command URLs (`https://user:pass@host`).
+- **Single-Pass Stage Partitioning & Regex Caching (#68)**: Optimized command guard multi-stage inspection with single-pass scanning and LRU regex caching.
+
 ## [0.2.19] - 2026-10-08
 
 ### Security & Hardening

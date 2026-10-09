@@ -90,7 +90,14 @@ graph LR
 * **无条件严重威胁阻断 (`secretBlockCritical`)** (#124)：针对系统根破坏、磁盘格式化、AWS及私钥外发等高危行为，即使处于 `audit_only` 或 `warning` 模式亦强制阻断；
 * **用户交互审批模式 (`ask`)** (#108)：在 `tools/pre-execute` 阶段与 DSH 审批机制无缝联动，高危操作返回 `{ kind: 'ask', reason, displayReason }` 请求用户确认；
 * **用户输入提示词前置过滤 (`agent/pre-step`)** (#110)：在大模型处理前扫描用户消息，及时拦截 Prompt 注入与越狱攻击 (`{ kind: 'reject' }`)；
-* **工具执行结果脱敏与净化 (`tools/post-execute`)** (#111)：拦截工具输出并在注入模型上下文前自动掩码敏感凭据与高熵机密。
+### 4. 🔒 可逆脱敏与占位符引擎 (`lib/mask/`)
+* **单调递增占位符与实体复用** (#126, #127)：在 `agent/pre-step` 阶段自动扫描提示词，将 API 密钥、私钥、邮箱、IPv4 及电话替换为单调占位符（`<KEY_1>`, `<EMAIL_1>`, `<IP_1>`）；同一会话内相同实体自动复用既有占位符；
+* **长度降序消除前缀碰撞** (#128)：恢复解密时按占位符长度严格降序处理（优先替换 `<KEY_10>` 再处理 `<KEY_1>`），避免子串切片破坏；
+* **会话还原命令** (#136)：授权用户可在终端通过斜杠命令本地还原原始内容：
+  ```text
+  /shadow-auditor restore <masked-text>
+  ```
+* **会话日志零泄露不变量** (#135)：发送给大模型的上下文和本地落盘的 JSONL 日志中绝不包含明文机密。
 
 ---
 
@@ -101,6 +108,7 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 ```
 
 ---
+
 
 ---
 

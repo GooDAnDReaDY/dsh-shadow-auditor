@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.23] - 2026-10-09
+
+### Fixed
+- **Cordis Proxy Isolation Safety (#133)**: Wrapped `ctx.storageDomain` detection in top-level `try/catch` block to safely catch Cordis proxy access exceptions when `storageDomain` is not injected, ensuring deterministic fallback to in-memory session mode without unhandled errors.
+
 ## [0.2.22] - 2026-10-09
 
 ### Added & Architecture

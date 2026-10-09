@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.22] - 2026-10-09
+
+### Added & Architecture
+- **Reversible Masking & Placeholder Engine (#126)**: Implemented session-scoped reversible PII and secret stripping via `Stripper` using monotonic `<TYPE_N>` placeholders with localized restoration tables.
+- **Monotonic Counters & Value Reuse (#127)**: Guaranteed consistent placeholder reuse for repeated secret and PII entities across multiple turns in a session.
+- **Descending Length Demasking (#128)**: Demasked placeholders strictly in descending order of length to eliminate prefix collisions (e.g. `<KEY_12>` before `<KEY_1>`).
+- **Interval-Based Overlap Resolution (#129)**: Implemented greedy non-overlapping interval selection sorting by start ascending, score descending, and span length descending.
+- **Persistent Storage Integration & Fallback (#132, #133)**: Persisted session restoration tables using DSH `storageDomain` (`'dsh_shadow_auditor'`) with graceful in-memory fallback and single informational diagnostic log.
+- **Async Storage Lifecycle Safety (#134)**: Prevented race conditions and unhandled rejections during plugin unloading while `storageDomain` is resolving.
+- **Session Log Cleanliness Invariant (#135)**: Pre-filtered user prompts on `agent/pre-step` and sanitized audit log arguments, ensuring zero raw secrets are stored in session logs or forwarded to LLM prompts.
+- **Session Demasking Command (#136)**: Registered session command `/shadow-auditor restore <text>` for authorized local demasking on client terminals.
+- **Web UI Settings Sync**: Added `enableReversibleMasking` configuration toggle in Section 1 with 100% English and Chinese localization dictionary parity.
+
 ## [0.2.21] - 2026-10-09
 
 ### Added & Architecture

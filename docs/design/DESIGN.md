@@ -244,3 +244,34 @@
 - Intercepts raw tool outputs in `tools/post-execute`.
 - Inspects text content blocks for exposed high-entropy secrets and sensitive infrastructure tokens.
 - Automatically redacts identified secrets using `maskSecret()` before model context ingestion, returning `{ kind: 'accept', content: sanitizedBlocks }`.
+
+## 19. Reversible Masking & Secret Placeholder Engine (#126–#129, #132–#136)
+
+### 19.1 Reversible PII & Secret Stripping (`Stripper`) (#126)
+- Instead of irreversible asterisk redacting (`***`), sensitive entities (API keys, tokens, emails, phone numbers, IP addresses, credentials) are replaced with structured placeholders `<TYPE_N>` (e.g. `<KEY_1>`, `<EMAIL_1>`, `<IP_1>`).
+- Maintains an in-memory session restoration table `{ placeholder: original }`.
+- Method `restore(text)` maps placeholders back to original values without side effects.
+
+### 19.2 Monotonic Placeholder Numbering with Value Reuse (#127)
+- Placeholders are monotonically generated per entity type within a session.
+- Identical original values encountered across multiple steps or messages reuse the existing placeholder (`<EMAIL_1>`), preserving co-reference and conversational context for LLMs.
+
+### 19.3 Collision-Free Demasking by Descending Placeholder Length (#128)
+- In `restore(text)`, placeholder substitutions are executed in strictly descending order of placeholder string length (`b.length - a.length || b.localeCompare(a)`).
+- Eliminates prefix collision vulnerabilities where shorter identifiers (e.g. `<KEY_1>`) could corrupt longer sibling placeholders (e.g. `<KEY_10>`).
+
+### 19.4 Overlap Resolution Algorithm (`resolveOverlaps`) (#129)
+- Matches from multi-pattern detection passes are sorted by `start` offset (ascending), followed by `score` (descending), and span length (descending).
+- Overlapping intervals are safely resolved by discarding colliding lower-priority/lower-score matches, preserving text integrity.
+
+### 19.5 Persistent Storage Domain Integration (`storageDomain`) (#132, #133, #134)
+- Session restoration mappings are persisted via DSH `ctx.storageDomain` under the `'dsh_shadow_auditor'` namespace when available (#132).
+- When `storageDomain` is absent, automatically degrades to transient in-memory storage with a single non-intrusive diagnostic log (#133).
+- Lifecycle cleanup tracking (`domainPromise`) prevents unhandled rejections and resource leaks during rapid plugin unloads (#134).
+
+### 19.6 Session Log Cleanliness Invariant (#135)
+- Cleartext secrets and PII are strictly prohibited from entering session JSONL logs, event streams, or model prompt payloads.
+- Telemetry captures only masked forms; originals reside solely in the isolated local restoration vault.
+
+### 19.7 Session Demasking Command (`/shadow-auditor restore`) (#136)
+- Provides authorized local console inspection via `/shadow-auditor restore <text>`, substituting session-scoped placeholders back to original cleartext for debugging and auditing.

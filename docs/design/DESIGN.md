@@ -183,3 +183,34 @@
 - Extracted HTTP routes (`/dsh-shadow-auditor/audit`, `/events`, `/export`) and trusted request verifiers into `lib/routes.js`, reducing `lib/index.js` to strictly < 500 lines.
 - `/events` and `/export` query parameters (`limit`) are clamped against `NaN` with `[1, 200]` and `[1, 5000]` boundaries. Uncaught errors in `/export` return sanitized `{ error: 'Failed to generate audit export' }` rather than leaking internal exception messages.
 - Removed duplicated `debugFailure` method definition in `AuditRecorder`.
+
+## 17. Command Guard Hardening & Evasion Defense (#68, #81, #82, #83, #106, #107)
+
+### 17.1 Zero-Width & Homoglyph Normalization (#82)
+- **Fast-path Exit**: Pure printable ASCII strings bypass normalization with zero allocation overhead.
+- **Invisible Character Stripping**: Strips zero-width characters and directional marks (`\u200B`–`\u200D`, `\uFEFF`, `\u2060`, `\u00AD`, `\u200E`, `\u200F`, `\u202A`–`\u202E`).
+- **Fullwidth Conversion**: Maps fullwidth ASCII (`\uFF01`–`\uFF5E`) and fullwidth spaces (`\u3000`) to standard ASCII characters.
+- **Homoglyph Transliteration**: Normalizes Cyrillic, Greek, and other visual lookalikes to Latin equivalents (e.g., Cyrillic a, c, e, o, p, x, y to Latin equivalents) without introducing raw Cyrillic literals in `lib/` (using Unicode escape sequences).
+
+### 17.2 Hidden Base64 Payload Inspection (#83)
+- **Payload Extraction**: Detects Base64 tokens in shell arguments (PowerShell `-EncodedCommand` / `-enc`, `base64 -d`, `openssl enc -d -base64`, `b64decode()`, and generic Base64 tokens).
+- **Safe Bounded In-Memory Decoding**: Decodes candidate tokens (up to 4 tokens per command, 16–4096 bytes) with UTF-8 and UTF-16LE validation.
+- **Recursive Inspection**: Non-recursive subscan (`_isSubscan: true`) passes decoded payloads to `findDangerous()`, detecting nested destructive commands or exfiltration and tagging them as `(hidden in base64 payload)`.
+
+### 17.3 Cross-Platform PowerShell & cmd.exe Syntax Analysis (#106)
+- **PowerShell Cmdlets & Aliases**: Supports `Remove-Item` and aliases (`ri`, `rmdir`, `rd`, `erase`, `del`) along with parameters (`-Recurse`, `-r`, `-Force`, `-Path`, `-LiteralPath`).
+- **Windows cmd.exe**: Supports `rd /s /q`, `rmdir /s /q`, `del /s /f`, and `erase /s`.
+- **Process Termination & System Commands**: Expands `DANGEROUS_PATTERNS` to cover Windows `Stop-Process`, `spps`, `taskkill /f`, and `reg delete ... /f`.
+
+### 17.4 Static Environment Variable Expansion for Path Targets (#107)
+- **`resolveEnvToken(token)`**: Recursively expands `~`, `$HOME`, `%USERPROFILE%`, `%TEMP%`, `%APPDATA%`, `%LOCALAPPDATA%`, `$env:VAR`, and `${VAR}` into canonical filesystem paths before performing workspace and protected system prefix checks.
+- **Prefix Guard Enforcement**: Unconditionally blocks destructive commands targeting `$HOME/.dsh`, `%USERPROFILE%/.ssh`, or `%TEMP%/dsh-subprocess-*`.
+
+### 17.5 Embedded URL Credentials Masking & Interception (#81)
+- **Redaction Invariant**: `lib/redact.js` masks embedded credentials in URLs (`https://user:password@host/path`) to `https://***:***@host/path` across all audit records and evidence.
+- **Guard Interception**: `findDangerous()` detects embedded URL credentials, permitting original command execution while dispatching non-blocking security alerts and sanitized audit logs.
+
+### 17.6 Single-Pass Stage Partitioning & Regex Caching (#68)
+- **Skip Redundant Pass**: If `segments.length <= 1`, per-stage checks are omitted since the full-command pass already evaluated all patterns.
+- **Global vs. Stage Separation**: Global rules (`checkWorkspaceEscape`, `checkProtectedForcePush`) execute once on the composite command rather than repeating per pipeline segment.
+- **Custom Pattern Caching**: Pre-compiles and caches custom regex blocklists using `getSafeRegExp` LRU cache.

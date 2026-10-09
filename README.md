@@ -124,11 +124,25 @@ dsh-shadow-auditor:
   strictSecretScanning: true    # Block execution if API keys or tokens are detected in diffs
   blockDangerousCommands: true  # Block destructive shell commands automatically
   secretBlockCritical: true     # Unconditionally block critical threats bypassing soft audit modes
+  enableReversibleMasking: true # Reversibly replace detected PII and secrets with <TYPE_N> placeholders
   shellGuardMode: 'enforce'     # Policy for command guard: enforce (block), audit_only (log), ask (interactive user prompt)
   diffGateMode: 'warning'       # Diff gate mode: disabled, warning, or block
   enableAuditBadge: true        # Display security shield badge in UI and approval dialogs
   enableAuditLog: true          # Record persistent JSONL audit logs with rotation under DSH_HOME
 ```
+
+---
+
+### 🔒 Reversible Masking & Placeholder Engine
+When `enableReversibleMasking` is active (default: `true`), incoming prompts at `agent/pre-step` are inspected. Detected secrets, API keys, private keys, emails, IPv4 addresses, and phone numbers are replaced with monotonic placeholders (`<KEY_1>`, `<EMAIL_1>`, `<IP_1>`).
+* **Value Reuse**: Identical sensitive values across steps and turns in the same session automatically reuse their existing placeholder.
+* **Prefix Collision Safety**: Demasking processes placeholders strictly in descending length order (`<KEY_10>` before `<KEY_1>`), preventing substring corruption.
+* **Session Demasking Command**: Authorized users can demask text locally using the slash command:
+  ```text
+  /shadow-auditor restore <masked-text>
+  ```
+* **Session Log Cleanliness Invariant**: LLM prompts and recorded audit JSONL logs contain zero raw secrets.
+
 
 ---
 

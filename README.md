@@ -90,6 +90,13 @@ graph LR
 * In-memory configurable rule matrix with toggleable strictness;
 * Security audit badge and incident log viewer in the DSH Web UI.
 
+### 4. 🪝 Multi-Surface Lifecycle Interception Engine (`lib/guards/lifecycle-hooks.js`)
+* **Priority Hook Registration (`prepend: true`)** (#125): Guarantees execution at the head of the Cordis handler pipeline before third-party extension handlers execute;
+* **Unconditional Critical Threat Blocking (`secretBlockCritical`)** (#124): High-severity destructive commands (root wipe, disk formatting, AWS/private key exfiltration) are strictly blocked even in `audit_only` or `warning` mode;
+* **Interactive User Approval Mode (`ask`)** (#108): Seamlessly integrates with DSH approval mechanism in `tools/pre-execute` returning `{ kind: 'ask', reason, displayReason }` on suspicious operations;
+* **Prompt Injection Pre-Filtering (`agent/pre-step`)** (#110): Scans incoming user messages before model ingestion, rejecting jailbreak and prompt-injection payloads early (`{ kind: 'reject' }`);
+* **Tool Result Sanitization & Output Redaction (`tools/post-execute`)** (#111): Intercepts tool outputs and masks exposed credentials and high-entropy secrets before model context ingestion.
+
 ---
 
 ## 🛠️ Agent Tools Reference (3 Tools)
@@ -116,7 +123,11 @@ dsh plugin --profile web add @goodandready/dsh-shadow-auditor
 dsh-shadow-auditor:
   strictSecretScanning: true    # Block execution if API keys or tokens are detected in diffs
   blockDangerousCommands: true  # Block destructive shell commands automatically
+  secretBlockCritical: true     # Unconditionally block critical threats bypassing soft audit modes
+  shellGuardMode: 'enforce'     # Policy for command guard: enforce (block), audit_only (log), ask (interactive user prompt)
+  diffGateMode: 'warning'       # Diff gate mode: disabled, warning, or block
   enableAuditBadge: true        # Display security shield badge in UI and approval dialogs
+  enableAuditLog: true          # Record persistent JSONL audit logs with rotation under DSH_HOME
 ```
 
 ---

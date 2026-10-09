@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.21] - 2026-10-09
+
+### Added & Architecture
+- **Guaranteed Priority Hook Execution (#125)**: Registered all security lifecycle hooks with Cordis `{ prepend: true }` so audit policies execute ahead of any user or third-party hooks.
+- **Unconditional Critical Threat Blocking (#124)**: Added `secretBlockCritical` schema configuration to unconditionally block destructive system commands and master secret leaks, bypassing soft audit modes (`shellGuardMode: 'audit_only'`, `diffGateMode: 'warning'`).
+- **DSH User Approval Integration & Ask Mode (#108)**: Supported `shellGuardMode: 'ask'` returning `{ kind: 'ask', reason, displayReason }` in `tools/pre-execute` for interactive confirmation via DSH user approval dialogs.
+- **Multi-Surface Lifecycle Interception Architecture (#109)**: Unified boundary security across `agent/pre-step`, `tools/guard`, `tools/pre-execute`, `tools/post-execute`, and `tools/result`.
+- **Prompt Injection Pre-Filtering (#110)**: Scanned user prompts on `agent/pre-step` before LLM processing, rejecting jailbreak and system-override attempts early (`{ kind: 'reject' }`).
+- **Tool Result Output Sanitization & Redaction (#111)**: Intercepted tool outputs on `tools/post-execute` and masked exposed credentials and high-entropy secrets using `maskSecret()` before context injection.
+
 ## [0.2.20] - 2026-10-09
 
 ### Security & Hardening

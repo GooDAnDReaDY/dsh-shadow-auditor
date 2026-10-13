@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.27] - 2026-10-13
+
+### Added & Host Auditing
+- **Audit Directory & Socket Permissions Check (#89)**: Added `checkConfigPermissions` auditing POSIX file modes (`stat.mode`) for audit logs, secret stores, and sockets against `0700` and `0600` ceilings with safe Windows no-op.
+- **Process Environment Variable Secrets Audit (#90)**: Implemented `checkEnvSecrets` inspecting `process.env` keys and values, identifying unmasked provider keys while safely masking credentials.
+- **Supply Chain Live CVE Check via npm Audit API (#91)**: Added `checkDepsSupplyChain` querying official npm audit endpoint with an AbortController timeout (3000ms) and offline degradation.
+- **Network Interface & Wildcard Listener Inspection (#92)**: Implemented `checkNetworkBindings` analyzing Linux procfs `/proc/net/tcp` and `os.networkInterfaces` to flag external wildcard listeners on 0.0.0.0 or :: without loopback boundaries.
+- **Historical Session Archive Stream Scanner (#93)**: Added `checkSessionsSensitive` streaming through `.jsonl`, `.gz`, and `.zst` archives with memory bounds and secret pattern matching.
+
 ## [0.2.26] - 2026-10-13
 
 ### Added & Security Hardening

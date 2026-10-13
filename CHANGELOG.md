@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.31] - 2026-10-13
+
+### Added & Performance
+- **In-Memory Ring Buffer (#118)**: Added fixed-size in-memory ring buffer (`maxReportEntries: 200`) in `AuditRecorder` providing sub-millisecond RAM responses on `/events` and recent queries without disk I/O bottlenecks.
+- **Chat Command `/shadow-auditor` (#119)**: Registered session command `/shadow-auditor` supporting `status`, `report`, and `restore <text>` subcommands with clean Markdown output and full English/Chinese localization.
+- **Subagent Report Tool (#120)**: Registered `shadow_auditor_report` tool in DSH tools service allowing coordinating agents and subagents to inspect aggregated session security metrics and blocked actions.
+- **Benchmark Attack Taxonomy Catalog (#122)**: Structured audit rules into canonical benchmark categories (`Family`: `instruction-injection`, `jailbreak`, `credential-leak`, `workspace-escape`) with standardized prefix IDs (`inj-001`, `jail-001`, `leak-001`, `esc-001`).
+- **Standardized Severity Ranking (#123)**: Added numerical `severityRank(severity)` (0..3: low/info: 0, medium: 1, high: 2, critical: 3) with case-insensitive normalization, `rankToSeverity`, and `maxSeverity` threat resolution.
+
 ## [0.2.30] - 2026-10-13
 
 ### Added & Performance

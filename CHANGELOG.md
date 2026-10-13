@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.25] - 2026-10-13
+
+### Added & Security Validation
+- **Multilingual Prompt Injection Defense (#76)**: Added detection for instruction overrides, role switching, system prompt leaks, and tool abuse across English and Chinese prompt environments.
+- **Shannon Entropy Secret Detection (#77)**: Implemented `calculateShannonEntropy` / `shannonEntropy` (threshold >= 4.5 bits/char, len >= 24, classes >= 2) in Diff Gate and secrets scanning, filtering UUIDs and SHA digests while identifying unstructured high-entropy tokens.
+- **Luhn Algorithm Card Verification (#78)**: Integrated `luhnValid` into `lib/redact.js` to accurately mask 13-19 digit payment cards while eliminating false positives on timestamps and order numbers.
+- **Calendar Date Validation for CN-ID (#79)**: Added `isValidCalendarDate` checking embedded dates (YYYYMMDD) including leap years and calendar day limits before redacting document numbers.
+- **IPv4 Octet Range Validation & Semver Protection (#80)**: Added `isValidIpv4` (0-255 range per octet) and `redactIpv4` with loopback preservation, preventing redaction collisions with semver package strings (e.g. `1.2.3.400`).
+
+## [0.2.24] - 2026-10-13
+
+### Fixed & Performance
+- **Audit Recorder Tail Reading & Telemetry (#67, #69, #70, #71, #72)**: Optimized audit recorder log tail reading and real-time telemetry streaming.
+
 ## [0.2.23] - 2026-10-09
 
 ### Fixed

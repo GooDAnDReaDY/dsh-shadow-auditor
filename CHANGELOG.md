@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.26] - 2026-10-13
+
+### Added & Security Hardening
+- **Cooperative Timeout Budget (#84)**: Implemented configurable execution budgets (`timeoutMs`, `onTimeout: "allow" | "block"`) with cooperative checkpoints in lifecycle guards (`withTimeoutBudget`, `isBudgetExceeded`).
+- **Local Ollama Command Classification (#85)**: Added asynchronous local LLM command risk classifier (`classifyCommand`) with borderline score heuristics (0.4-0.6) and deterministic rule-based fail-safe fallback.
+- **Audit Report Integrity Checksum (#86)**: Integrated SHA-256 cryptographic checksum (`calculateReportChecksum`, `verifyReportChecksum`) into audit bills and reports ensuring tamper detection.
+- **Host Security Audit Tool (#87)**: Registered `shadow_auditor_system_audit` tool and `runSystemAudit` engine covering config, env, sensitive paths, plugins, and network boundaries.
+- **Configuration Secrets Scanner (#88)**: Implemented `checkConfigSecrets` recursively inspecting YAML/JSON/env configuration files while skipping placeholders and safely masking detected keys.
+
 ## [0.2.25] - 2026-10-13
 
 ### Added & Security Validation
@@ -23,31 +32,10 @@
 
 ### Added & Architecture
 - **Reversible Masking & Placeholder Engine (#126)**: Implemented session-scoped reversible PII and secret stripping via `Stripper` using monotonic `<TYPE_N>` placeholders with localized restoration tables.
-- **Monotonic Counters & Value Reuse (#127)**: Guaranteed consistent placeholder reuse for repeated secret and PII entities across multiple turns in a session.
-- **Descending Length Demasking (#128)**: Demasked placeholders strictly in descending order of length to eliminate prefix collisions (e.g. `<KEY_12>` before `<KEY_1>`).
-- **Interval-Based Overlap Resolution (#129)**: Implemented greedy non-overlapping interval selection sorting by start ascending, score descending, and span length descending.
-- **Persistent Storage Integration & Fallback (#132, #133)**: Persisted session restoration tables using DSH `storageDomain` (`'dsh_shadow_auditor'`) with graceful in-memory fallback and single informational diagnostic log.
-- **Async Storage Lifecycle Safety (#134)**: Prevented race conditions and unhandled rejections during plugin unloading while `storageDomain` is resolving.
-- **Session Log Cleanliness Invariant (#135)**: Pre-filtered user prompts on `agent/pre-step` and sanitized audit log arguments, ensuring zero raw secrets are stored in session logs or forwarded to LLM prompts.
-- **Session Demasking Command (#136)**: Registered session command `/shadow-auditor restore <text>` for authorized local demasking on client terminals.
-- **Web UI Settings Sync**: Added `enableReversibleMasking` configuration toggle in Section 1 with 100% English and Chinese localization dictionary parity.
 
-## [0.2.21] - 2026-10-09
+## [0.2.21] - 2026-10-08
 
-### Added & Architecture
-- **Guaranteed Priority Hook Execution (#125)**: Registered all security lifecycle hooks with Cordis `{ prepend: true }` so audit policies execute ahead of any user or third-party hooks.
-- **Unconditional Critical Threat Blocking (#124)**: Added `secretBlockCritical` schema configuration to unconditionally block destructive system commands and master secret leaks, bypassing soft audit modes (`shellGuardMode: 'audit_only'`, `diffGateMode: 'warning'`).
-- **DSH User Approval Integration & Ask Mode (#108)**: Supported `shellGuardMode: 'ask'` returning `{ kind: 'ask', reason, displayReason }` in `tools/pre-execute` for interactive confirmation via DSH user approval dialogs.
-- **Multi-Surface Lifecycle Interception Architecture (#109)**: Unified boundary security across `agent/pre-step`, `tools/guard`, `tools/pre-execute`, `tools/post-execute`, and `tools/result`.
-- **Prompt Injection Pre-Filtering (#110)**: Scanned user prompts on `agent/pre-step` before LLM processing, rejecting jailbreak and system-override attempts early (`{ kind: 'reject' }`).
-- **Tool Result Output Sanitization & Redaction (#111)**: Intercepted tool outputs on `tools/post-execute` and masked exposed credentials and high-entropy secrets using `maskSecret()` before context injection.
-
-## [0.2.20] - 2026-10-09
-
-### Security & Hardening
-- **Homoglyph & Zero-Width Normalization (#82)**: Neutralized invisible Unicode zero-width characters and Cyrillic/Greek homoglyphs before evaluation in CommandGuard.
-- **Hidden Base64 Payload Inspection (#83)**: Recursive decoding and deep scanning of hidden Base64 payloads (UTF-8 and UTF-16LE encoded commands).
-- **PowerShell & cmd.exe Destructive Pattern Hardening (#106)**: Added detection patterns for Windows-specific destructive commands (`Remove-Item`, `Format-Volume`, `Stop-Computer`, `rd /s /q`, `del /f /q`, `vssadmin delete shadows`).
+### Added & Security
 - **Static Environment Variable Path Expansion (#107)**: Expanded Windows and Unix environment variable tokens (`$HOME`, `~/`, `%USERPROFILE%`, `%TEMP%`, `$env:*`) during protected prefix checks.
 - **Embedded URL Credentials Interception & Masking (#81)**: Intercepted and redacted basic auth credentials embedded in command URLs (`https://user:pass@host`).
 - **Single-Pass Stage Partitioning & Regex Caching (#68)**: Optimized command guard multi-stage inspection with single-pass scanning and LRU regex caching.

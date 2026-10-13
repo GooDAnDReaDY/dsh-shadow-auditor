@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.29] - 2026-10-13
+
+### Added & Performance
+- **Runtime Agent Skill Registration (#99)**: Added `registerShadowAuditSkill` registering `shadow-audit-review` in DSH `skills` service upon availability with comprehensive security audit review instructions.
+- **Diagnostic Error Sanitization (#100)**: Implemented `sanitizeError` and `sanitizeErrorMessage` masking host storage and drive paths (`<home>`, `<storage>`, `<drive>`, `<module>`) and suppressing internal stack traces in client diagnostics.
+- **Aho-Corasick Multi-Pattern Automaton (#101)**: Integrated pure JS `AhoCorasick` automaton performing linear O(N + M) multi-keyword search across commands and diffs with BFS failure transitions.
+- **Two-Phase Fast Scanner Architecture (#102)**: Added `TwoPhaseScanner` combining linear Aho-Corasick static needle search with targeted regex execution, eliminating regex evaluation on clean inputs.
+- **Zero-Leak MatchInfo Invariant (#112)**: Implemented `createMatchInfo` and `toZeroLeakMatch` ensuring finding and event records store only safe masked snippets (`safeSnippet`), offsets, and types without raw plaintext secret strings.
+
 ## [0.2.28] - 2026-10-13
 
 ### Added & Performance

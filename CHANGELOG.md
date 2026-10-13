@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.30] - 2026-10-13
+
+### Added & Performance
+- **Unicode NFKC Text Normalization (#113)**: Added `normalizeNfkc` in `diff-gate` to normalize visual mathematical letters, fullwidth glyphs, and homoglyphs to standard characters before pattern matching.
+- **Head Scan Limit for Large Documents (#114)**: Added `maxScanChars` (default 10,000 for raw files) to bound scanning on megabyte-sized assets with `truncated: true` reporting.
+- **Findings Limit per Scan (#115)**: Added `maxMatches` capping (default 100) preventing memory blowout and reporting `matchesCapped: true`.
+- **Session Envelope Ignorable Flag (#116)**: Added `appendSessionEvent` and `recordToSession` stamping session-scoped audit records with `{ ignorable: true }` for safe backwards compatibility.
+- **Typed Detection Event Registry (#117)**: Created `DetectionEvent` discriminated union registry (`dsh-shadow-auditor/detection`) with `createDetectionEvent` and `isDetectionEvent`.
+
 ## [0.2.29] - 2026-10-13
 
 ### Added & Performance

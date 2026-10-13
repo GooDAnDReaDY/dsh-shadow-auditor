@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.28] - 2026-10-13
+
+### Added & Performance
+- **Plugin Sources & Patch Integrity Verification (#94)**: Implemented `checkPluginsPatchSources` inspecting `cordis.patch.yml` and plugin manifests, flagging unauthorized scopes (`@untrusted`), suspicious `eval` expressions, or untrusted git archive URLs.
+- **Path Normalization in Reports & Feeds (#95)**: Added `norm(base, workspace, path)` replacing home directories with `<base>` and workspace roots with `<workspace>` across both POSIX and Windows path representations.
+- **Protected Network Signatures (#96)**: Added `PROTECTED_SIGNALS` (`127.0.0.1`, `0.0.0.0`, `::1`, `::`, `localhost`) preserving critical loopback diagnostic signals from sanitizer redaction.
+- **Weighted Session Security Score (#97)**: Implemented `calculateSecurityScore` calculating an aggregated security index (0..100) and status ratings (`Safe`, `Needs Attention`, `Dangerous`) based on `SEVERITY_WEIGHT`.
+- **Diff Gate LRU Caching (#98)**: Added LRU result cache (512 entries) keyed by `sha256(content) + rulesetVersion`, invalidating automatically on `setRulesetVersion`.
+
 ## [0.2.27] - 2026-10-13
 
 ### Added & Host Auditing
@@ -98,7 +107,7 @@ All notable changes to `@goodandready/dsh-shadow-auditor` are documented in this
 ### Added
 - **Destructive Deletion Workspace Guard (#103)**: Strictly block recursive deletions (`rm -rf`, PowerShell `Remove-Item -Recurse`, `rd /s`, `git clean -fdx`) targeting filesystem root (`/`, `~`, `.`) or paths resolving outside the session workspace.
 - **Critical System Prefix Protection (#105)**: Unconditional protection for sensitive system directories (`~/.dsh`, `~/.claude`, `~/.ssh`, `/etc`, `/usr`, `C:\Windows`), preventing deletion even when the session workspace is located in the home directory.
-- **Dry-Run Pass-Through Verification (#104)**: Recognize verification and preview flags (`-WhatIf`, `-Confirm`, `--dry-run`, `git clean -n`), allowing safe preview commands without triggering false-positive deletion blocks, while recording safety audits.
+- **Dry-Run Pass-Through Verification (#104)**: Recognize verification and preview flags (`-WhatIf`, `-Confirm`, `--dry-run`, `git clean -n`), позволяя safe preview commands without triggering false-positive deletion blocks, while recording safety audits.
 
 ### Fixed
 - **Diff Gate Unified Detection Heuristic (#65)**: Fixed false-positive `isUnifiedDiff` heuristic that misclassified regular files containing `@@` markers as diffs and bypassed security scans in `scanFileContent`.

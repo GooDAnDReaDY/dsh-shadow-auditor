@@ -275,3 +275,54 @@
 
 ### 19.7 Session Demasking Command (`/shadow-auditor restore`) (#136)
 - Provides authorized local console inspection via `/shadow-auditor restore <text>`, substituting session-scoped placeholders back to original cleartext for debugging and auditing.
+
+## 20. Architecture Contract & Security Guarantees (#150, #209)
+
+### 20.1 Four Interception Surfaces
+The plugin enforces multi-layered defense-in-depth across 4 orthogonal execution surfaces:
+1. **Tool Pre-Execution Guard (`tools/pre-execute` / `registerToolsGuard`)**:
+   - Intercepts shell and command execution (`bash`, `sh`, `terminal`, `exec`, `run_command`, `*_exec`, and any tool receiving command/script arguments).
+   - Detects destructive commands (`rm -rf`, `mkfs`, `kill`), hidden base64 payloads (including UTF-16LE PowerShell `-EncodedCommand`), exfiltration pipes, and sensitive credential modifications.
+   - Enforces fail-safe posture: in `enforce` mode, exceptions in guard logic return `{ kind: 'deny' }` or alert rather than failing open.
+2. **Pre-Step Prompt Shield (`agent/pre-step`)**:
+   - Analyzes incoming user messages and context turns before model submission.
+   - Shields against prompt-injection, adversarial instruction overrides, and jailbreak attempts using multi-keyword Aho-Corasick automaton and heuristic scoring.
+3. **Tool Output Sanitizer (`tools/post-execute`)**:
+   - Inspects outgoing tool execution results before model context ingestion.
+   - Automatically sanitizes and masks leaked high-entropy API keys, private tokens, and credentials, preserving result semantics while neutralizing exfiltration vectors.
+4. **Code-Security Diff Gate (`scanDiff` / `scanFileContent`)**:
+   - Performs two-phase static analysis (Aho-Corasick static needle search followed by targeted AST/regex evaluation) on code modifications and file patches.
+   - Flags SQL injection, dynamic command execution (`eval`), path traversal, and hardcoded provider secrets with Shannon entropy validation.
+
+### 20.2 Zero-Leak Invariant
+- **Safe MatchInfo Contract**: All finding structures (`MatchInfo`, `DetectionEvent`, `createFinding`) strictly store only `safeSnippet` (edge-truncated masks e.g. `sk****90`), offset indices, and rule identifiers.
+- **Zero Cleartext In Storage**: Raw plaintext secrets and credentials are never persisted to disk JSONL archives, memory ring buffers (`AuditRecorder`), diagnostic error stacks, or client telemetry feeds.
+- **Vault Isolation**: Cleartext mappings reside solely within transient memory or the isolated `storageDomain` vault, restored exclusively on authorized explicit demand.
+
+### 20.3 Data Flow Architecture
+
+```mermaid
+graph TD
+    UserPrompt["User Prompt / Turn"] --> PreStepHook["1. agent/pre-step Hook"]
+    PreStepHook -->|Prompt Injection Check| ModelContext["LLM Context Window"]
+    
+    ModelContext --> ToolCall["Agent Tool Call"]
+    ToolCall --> PreExecHook["2. tools/pre-execute Guard"]
+    PreExecHook -->|Safe & Validated| ToolExecution["Host Tool Execution"]
+    PreExecHook -->|Destructive / Dangerous| BlockDeny["Deny / Ask Approval"]
+    
+    ToolExecution --> PostExecHook["3. tools/post-execute Sanitizer"]
+    PostExecHook -->|Mask Raw Secrets| ModelContext
+    
+    FileDiff["Code Patch / Unified Diff"] --> DiffGate["4. Diff Gate Two-Phase Scanner"]
+    DiffGate -->|Block / Warning Finding| AuditRecorder["AuditRecorder (Ring Buffer & JSONL)"]
+    
+    AuditRecorder --> StorageDomain["DSH Storage Domain / Memory Vault"]
+```
+
+### 20.4 Release Hygiene & Integrity Standards
+- **Zero Cyrillic in Engine**: `lib/` must strictly maintain zero Cyrillic literals (`git grep -P '[\x{0400}-\x{04FF}]' lib/` = 0).
+- **Zero External Runtime Dependencies**: All modules in `lib/` rely solely on native `node:*` APIs for instant offline testing and predictable reproducibility.
+- **Bounded Plugin Core**: `lib/index.js` strictly bounded below 500 lines.
+- **Artifact Quarantine**: All production builds `.tgz` are archived into `/mnt/external/Project/DEV/.artifacts-cache/`.
+

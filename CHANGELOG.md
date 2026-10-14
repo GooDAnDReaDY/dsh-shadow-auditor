@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.35] - 2026-10-14
+
+### Security & Architecture
+- **Architecture Contract & Security Guarantees Specification (#150)**: Added Section 20 to `docs/design/DESIGN.md` detailing the 4 interception surfaces, Zero-Leak invariant, fail-safe security posture, threat mitigation table, and Mermaid sequence data flow.
+- **Fail-Safe Security Posture & Hardened Tool Detection (#209)**: Hardened `isCommandTool` inspection for both naming and argument shapes (`command`, `cmd`, `CommandLine`, `script`, `powershell`); added dedicated PowerShell `-EncodedCommand` / `-enc` base64 decoder with UTF-16LE and UTF-8 support; converted `tools/pre-execute` and tool guards to strictly fail-closed upon handler error in enforce mode; sanitized output blocks on `tools/post-execute` exceptions; gated updater minimum release age flag behind explicit option.
+
 ## [0.2.34] - 2026-10-14
 
 ### Added & Architecture

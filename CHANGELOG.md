@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.32] - 2026-10-14
+
+### Added & Performance
+- **Ignorable Envelope Runtime Probe (#130)**: Added `probeIgnorableAppend(session)` safely testing whether host runtime or session envelope supports ignorable events, preventing session corruption on legacy host cores.
+- **Deduplicated Event Gate (#131)**: Added `makeEventGate` managing adaptive audit event appending with per-session warning deduplication (`hasWarned`), emitting warning at most once per session and suppressing unsupported writes cleanly.
+- **Stateless Mask Testing Tool (#137)**: Registered `shadow_auditor_mask_test` tool and exported `testMasking(text)` for ad-hoc stateless inspection of sensitive entity masking rules with entity frequency statistics.
+- **Pluggable Detector Provider Seam (#138)**: Decoupled sensitive token discovery via pluggable `detector` option on `Stripper` and `StripperRegistry`, enabling runtime injection of domain-specific detector functions while defaulting to `findSensitiveMatches`.
+- **LRU Session Eviction & Per-Session Store Limits (#139)**: Added LRU cache eviction in `StripperRegistry` (`maxSessions: 100`) and FIFO entry eviction in `Stripper` (`maxRestoreEntriesPerSession: 500`), guaranteeing bounded memory usage during long-running background operations.
+
 ## [0.2.31] - 2026-10-13
 
 ### Added & Performance

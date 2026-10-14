@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.33] - 2026-10-14
+
+### Added & Reliability
+- **Domain Persistence Schemas (#140)**: Implemented `AuditRecordSchema`, `SessionMappingSchema`, and `ConfigSchema` with `parse` / `safeParse` validation at storage boundaries, preventing corrupted configuration and database state.
+- **Structured Domain Errors `AuditorError` (#141)**: Added `AuditorError` class hierarchy with machine-readable error codes (`ERR_BOUNDS_EXCEEDED`, `ERR_RESTORE_FAILED`, `ERR_STORAGE_UNAVAILABLE`, `ERR_VALIDATION_FAILED`) and sanitized diagnostic details.
+- **Incremental Replacement Telemetry `stripInto` (#142)**: Added `stripInto` returning per-step replacement delta histograms (`{ [type]: count }`) and incrementing telemetry accumulators in real-time without persisting sensitive token values.
+- **Safe Mapping Summaries `summarizeMapping` (#143)**: Added `summarizeMapping` generating sanitized edge-truncated sample previews (`sk****90`, `a****f`, `****`) for UI inspection without exposing cleartext credentials.
+- **Counter Continuity on Restart `loadMapping` (#144)**: Added `loadMapping` parsing maximum numerical indices from existing placeholder tables (`<TYPE_N>`), guaranteeing continuous sequential numbering without collisions across host reboots.
+
 ## [0.2.32] - 2026-10-14
 
 ### Added & Performance

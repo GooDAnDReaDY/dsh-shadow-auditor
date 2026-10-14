@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.34] - 2026-10-14
+
+### Added & Architecture
+- **Fail-Fast Configuration Validation (#145)**: Added `resolveConfig` performing strict startup type, bounds, and enum checks on plugin configuration, rejecting malformed settings early with descriptive error details.
+- **Pure Standard Library Isolation (#146)**: Decoupled all `lib/` modules from external runtime packages and Cordis interfaces to pure `node:*` primitives, enabling instant offline unit testing via `node --test`.
+- **Architectural Separation of Sanitize & Mask (#147)**: Formally isolated irreversible redaction (`lib/sanitize.js`) for disk logging and billing from reversible prompt shielding (`lib/mask.js`) with zero cross-module side-effects.
+- **Expanded Token Detection (#148)**: Extended secret scanner with high-precision detectors for GitHub fine-grained PATs (`github_pat_`), Slack API tokens (`xoxb-`/`xoxp-`), AWS STS keys (`ASIA`/`ABIA`), and HTTP Bearer authorization headers.
+- **Browser Demasking Slot Preparedness (#149)**: Added `maskClientEnabled` configuration setting (default false) and client exchange architecture for future browser-side automatic demasking components.
+
 ## [0.2.33] - 2026-10-14
 
 ### Added & Reliability

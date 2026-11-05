@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.36] - 2026-11-05
+
+### Added & UI
+- **Configurable Header Shield Indicator (#225)**: Added `enableHeaderShield` volatile boolean setting (default `true`) allowing users to toggle visibility of the chat session header security shield indicator (`conversation.session.header.utilities`).
+- **Decoupled Security Badges (#225)**: Formally separated header shield indicator visibility (`enableHeaderShield`) from tool approval dialog badges (`enableAuditBadge`), ensuring security auditing, prompt shields, diff gates, and approval alerts remain uncompromised when header chips are hidden.
+- **Instant Reactive Sync & Zero-Flash Persistence (#225)**: Synchronized chip visibility reactively via `sa-header-shield-change` window event and persistent `localStorage` backing (`dsh_sa_header_shield`), providing instantaneous zero-flash mounting and cross-view state propagation without requiring harness restarts.
+- **Updated Design Documentation (#225)**: Added Section 21 to `docs/design/DESIGN.md` outlining the architectural rationale, persistence contract, and decoupled protection model.
+
 ## [0.2.35] - 2026-10-14
 
 ### Security & Architecture

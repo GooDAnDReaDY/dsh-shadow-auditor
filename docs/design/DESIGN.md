@@ -32,7 +32,7 @@
   - `error`: Вывод сообщения об ошибке сохранения в подвале карточки.
   - `success`: Вывод уведомления `Сохранено` / `Saved`.
 - Формы, валидация и действия:
-  - Чекбоксы: `strictSecretScanning`, `blockDangerousCommands`, `enableAuditBadge`, `enableAuditLog`.
+  - Чекбоксы: `strictSecretScanning`, `blockDangerousCommands`, `enableHeaderShield` (видимость значка щита в шапке чата), `enableAuditBadge` (бейдж в диалогах подтверждения), `enableAuditLog`.
   - Числовые поля: `maxFileSizeMb` (лимит файла в МБ), `retentionDays` (хранение в днях).
   - Кнопка «Сохранить» / «Save» с анимацией сохранения.
 
@@ -325,4 +325,16 @@ graph TD
 - **Zero External Runtime Dependencies**: All modules in `lib/` rely solely on native `node:*` APIs for instant offline testing and predictable reproducibility.
 - **Bounded Plugin Core**: `lib/index.js` strictly bounded below 500 lines.
 - **Artifact Quarantine**: All production builds `.tgz` are archived into `/mnt/external/Project/DEV/.artifacts-cache/`.
+
+## 21. Configurable Header Shield Indicator (#225)
+
+### 21.1 Architectural Rationale
+- The chat header security shield (`AuditShieldChip`) mounted on `conversation.session.header.utilities` provides at-a-glance visibility into runtime security posture (green/yellow/red).
+- In dense multi-plugin workspaces, users require the ability to toggle header chips without disabling actual auditing, background guard protections, diff-gate scanning, or approval dialog security badges (`enableAuditBadge`).
+
+### 21.2 Configuration & Persistence Contract
+- **Schema Field**: `enableHeaderShield` (Boolean, default `true`, volatile).
+- **Decoupled Protection**: Disabling `enableHeaderShield` removes only the header chip element (`returns null`). All backend guards, Diff Gate, SAST scanner, and approval badges remain strictly active.
+- **Instant Reactive Sync**: UI checkbox dispatches `sa-header-shield-change` custom window event and persists state in `localStorage` under `dsh_sa_header_shield`, achieving zero-flash unmounting and cross-view synchronization without server restarts.
+- **Persistence Across Restarts**: Backed by DSH `ctx.settings.subscribe` and `scope.set('enableHeaderShield', val)` in the plugin settings form (`dsh-shadow-auditor`).
 

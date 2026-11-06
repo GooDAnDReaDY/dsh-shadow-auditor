@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.37] - 2026-11-06
+
+### Security & Guards
+- **Outbound Machine-Leaving Operation Detection (#220)**: Added `looksMachineLeaving` and `findMachineLeaving` matching `MACHINE_LEAVING_SHAPES` patterns (`git push`, `npm publish`, `docker push`, `kubectl/helm`, `aws/gcloud/az`, `curl -X POST`, `ssh/rsync/scp/nc`, `deploy`) without LLM token cost.
+- **Configurable Outbound Policy Matrix (#220)**: Added `machineLeavingAction` setting (`block`, `review`, `warn`, `ignore`, default `warn`) integrated into `tools/guard` and `tools/pre-execute` lifecycle hooks with dedicated `machine-leaving-operation` audit logging.
+- **Ancestor Crawl Symlink Resolution (#221)**: Implemented `realpathSafe` safely resolving nonexistent target descendants by climbing directory ancestors to the nearest existing canonical path, preventing sandbox escape via symlinks.
+- **Trust Boundary Verification (#221)**: Implemented `isInsideTrusted` and hardened `isSensitivePath` and `isTargetOutsideWorkspace` against symlink traversal evasions.
+- **Updated Design Documentation (#220, #221)**: Added Section 22 to `docs/design/DESIGN.md` detailing machine-leaving operation matrix and ancestor crawl safety guarantees.
+
 ## [0.2.36] - 2026-11-05
 
 ### Added & UI

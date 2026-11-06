@@ -338,3 +338,20 @@ graph TD
 - **Instant Reactive Sync**: UI checkbox dispatches `sa-header-shield-change` custom window event and persists state in `localStorage` under `dsh_sa_header_shield`, achieving zero-flash unmounting and cross-view synchronization without server restarts.
 - **Persistence Across Restarts**: Backed by DSH `ctx.settings.subscribe` and `scope.set('enableHeaderShield', val)` in the plugin settings form (`dsh-shadow-auditor`).
 
+## 22. Outbound Machine-Leaving Operation Protection & Ancestor Crawl Safe Resolution (#220, #221)
+
+### 22.1 Outbound Machine-Leaving Operations (`MACHINE_LEAVING_SHAPES`) (#220)
+- **Problem**: Destructive command patterns catch `rm -rf`, DB drop, or reverse shells, but autonomous agent tools could still perform unprompted external mutations that leave the local machine (e.g. `git push`, `npm publish`, `docker push`, `terraform apply`, `aws s3 cp`, `curl -X POST`, `ssh`).
+- **Detection Engine**: `looksMachineLeaving(command)` and `findMachineLeaving(command)` inspect execution segments against `MACHINE_LEAVING_SHAPES` patterns without LLM token cost.
+- **Configurable Action Matrix**: `machineLeavingAction` supports 4 policy states:
+  - `block`: Immediately denies command execution with descriptive error.
+  - `review`: Escalates tool call to require explicit user approval (`ask`).
+  - `warn`: Allows command execution while recording a `machine-leaving-operation` audit event and setting a yellow audit indicator.
+  - `ignore`: Passes command through to subsequent checks with zero overhead.
+
+### 22.2 Safe Symlink Resolution via Ancestor Crawl (`realpathSafe`) (#221)
+- **Problem**: When tools create or write files that do not yet exist on disk, raw `realpathSync` fails with `ENOENT`, while naive `path.resolve` fails to detect symlinks in parent directories, permitting sandbox escape.
+- **Algorithm**: `realpathSafe(targetPath)` recursively climbs parent directories (`path.dirname`) until reaching the nearest existing ancestor, resolves its canonical filesystem `realpathSync`, and re-attaches the trailing descendant segment.
+- **Trust Boundary Verification**: `isInsideTrusted(path, roots, base)` proves that canonical targets lie strictly inside authorized workspace roots, preventing symlink directory traversal escape.
+
+

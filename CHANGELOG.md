@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.39] - 2026-11-06
+
+### Config & Extensibility
+- **Rule and Pattern List Defaults Expansion (`$defaults`) (#223)**: Implemented `expandDefaults(userArray, defaultArray)` in `lib/domain.js`, enabling configuration lists (`rules`, `ignoredPatterns`, `customBlockedCommands`, `sensitivePathPatterns`) to inherit and extend built-in catalogs using the `"$defaults"` token without duplicating upstream rules.
+- **In-Place Ordering & Deduplication (#223)**: Preserved positional placement of custom entries relative to defaults (before, middle, or after) while deduplicating merged lists based on first-seen order.
+- **Fail-Fast Schema Integration (#223)**: Integrated `expandDefaults` into `resolveConfig`, ensuring explicit overrides without `"$defaults"` replace defaults while supporting array and multiline string configurations.
+- **Updated Design & User Documentation (#223)**: Added Section 24 to `docs/design/DESIGN.md` and user guide in `README.md`.
+
 ## [0.2.38] - 2026-11-06
 
 ### Security & Guards

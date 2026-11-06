@@ -131,6 +131,19 @@ dsh-shadow-auditor:
   enableAuditLog: true          # Record persistent JSONL audit logs with rotation under DSH_HOME
 ```
 
+### 🧩 Extending Default Rule and Pattern Lists (`$defaults`)
+When configuring custom rule lists or path patterns (`sensitivePathPatterns`, `ignoredPatterns`, `customBlockedCommands`), include the special token `"$defaults"` to inherit built-in items without duplicating upstream catalogs:
+
+```yaml
+dsh-shadow-auditor:
+  sensitivePathPatterns:
+    - "$defaults"
+    - "custom-keys/*.pem"
+    - "secrets/prod.json"
+```
+
+If `"$defaults"` is omitted, the list acts as an explicit override. An empty list `[]` disables all default patterns for that field.
+
 ---
 
 ### 🔒 Reversible Masking & Placeholder Engine

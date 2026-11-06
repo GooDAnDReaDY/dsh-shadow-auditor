@@ -374,5 +374,19 @@ graph TD
   4. **Actionable Guidance**: Contextual guidance directing the model to non-destructive inspection (dry-run, explain) or requiring explicit user confirmation instead of repeating the denied action.
   5. **Breaker Status Notice**: When the circuit breaker is tripped, injects the prominent warning requiring user guidance before automated retries resume.
 
+## 24. Configuration Defaults Expansion ($defaults) (#223)
+
+### 24.1 Architectural Rationale
+- When configuring plugin security rules or path exclusions in `cordis.patch.yml`, passing a custom array previously replaced the built-in defaults entirely.
+- In order to add a single custom sensitive path or rule, users were forced to duplicate the entire upstream catalog into their local configuration, breaking whenever upstream defaults were expanded or updated.
+
+### 24.2 Token Expansion Semantics (`expandDefaults`)
+- **Token**: Special string literal `"$defaults"` inside an array or multiline/comma-separated string.
+- **In-Place Expansion**: If `"$defaults"` is present, it expands into the complete built-in default array at the exact specified position, allowing custom rules before or after defaults (e.g. `["pre-rule", "$defaults", "post-rule"]`).
+- **Explicit Override**: If `"$defaults"` is omitted, the user list acts as an explicit override replacing default items. An empty array `[]` completely clears the list.
+- **Deduplication & Order Preservation**: Merged items preserve the order of their first appearance without duplicate entries.
+- **Integrated Config Surfaces**: `resolveConfig` automatically applies `expandDefaults` across `rules`, `ignoredPatterns`, `customBlockedCommands`, and `sensitivePathPatterns`.
+
+
 
 

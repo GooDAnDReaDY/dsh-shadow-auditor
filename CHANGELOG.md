@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.38] - 2026-11-06
+
+### Security & Guards
+- **Circuit Breaker Loop Protection (#222)**: Implemented `CircuitBreaker` in `lib/guards/breaker.js` tracking per-session consecutive and total guard violations, automatically tripping (`tripped = true`) when thresholds (`breakerConsecutive`, default 3; `breakerTotal`, default 20) are reached to halt model spinloops and prevent context token exhaustion.
+- **Action Reshaping & Contextual Denial Echo (#224)**: Implemented structured denial feedback generator `formatGuardDenial(category, reason, modelExplanation)` with categorical emoji tagging, reason explanation, echoed model intent, and actionable recovery guidance directing the model toward safe inspection instead of repetitive retries.
+- **Multi-Surface Waterfall Integration (#222, #224)**: Integrated Circuit Breaker and Action Reshaping into `tools/guard` and `tools/pre-execute` lifecycle hooks, recording audit events with `breaker-tripped` tag, resetting consecutive counters on permitted operations, and exposing `resume(sessionId)` to restore tripped sessions.
+- **Updated Design Documentation (#222, #224)**: Added Section 23 to `docs/design/DESIGN.md` detailing the Circuit Breaker state machine and Action Reshaping feedback layer.
+
 ## [0.2.37] - 2026-11-06
 
 ### Security & Guards

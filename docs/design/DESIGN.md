@@ -354,4 +354,25 @@ graph TD
 - **Algorithm**: `realpathSafe(targetPath)` recursively climbs parent directories (`path.dirname`) until reaching the nearest existing ancestor, resolves its canonical filesystem `realpathSync`, and re-attaches the trailing descendant segment.
 - **Trust Boundary Verification**: `isInsideTrusted(path, roots, base)` proves that canonical targets lie strictly inside authorized workspace roots, preventing symlink directory traversal escape.
 
+## 23. Circuit Breaker Loop Protection & Action Reshaping Denial Echo (#222, #224)
+
+### 23.1 Circuit Breaker State Machine (`CircuitBreaker`) (#222)
+- **Problem**: When guard denials occur repeatedly, autonomous agent loops frequently hallucinate syntax permutations of the exact same forbidden command, rapidly burning context tokens and spamming audit logs.
+- **State Machine Architecture**: `CircuitBreaker` maintains per-session counters (`consecutive` and `total` denials) alongside `tripped` status.
+- **Threshold Tripping**:
+  - `breakerConsecutive` (default 3): trips breaker immediately when 3 consecutive denials occur without an intervening successful/permitted operation.
+  - `breakerTotal` (default 20): trips breaker if cumulative denials across the session reach threshold.
+- **Runtime Enforce**: When tripped, guards immediately halt execution before evaluating tool arguments or regexes, logging an audit event with tag `breaker-tripped` and returning a definitive lock notification.
+- **Resume Mechanism**: `breaker.resume(sessionId)` unlocks execution, clearing consecutive counters and tripped state after human intervention.
+
+### 23.2 Action Reshaping & Intent Echo (`formatGuardDenial`) (#224)
+- **Problem**: Monolithic denial strings (`Command blocked`) give the model no structured context or guidance, leading to blind retry attempts.
+- **Denial Generator Contract**: `formatGuardDenial(category, reason, modelExplanation, options)` structures feedback into four explicit semantic layers:
+  1. **Header & Category**: High-visibility emoji badge and category (`destructive-command`, `machine-leaving`, `path-escape`, `sensitive-write`, `secret-leak`, `circuit-breaker`).
+  2. **Reason**: Concrete explanation identifying the dangerous pattern or target.
+  3. **Model Intent Echo**: Extracts model rationale from arguments (`explanation`, `reason`, `justification`, `intent`) and echoes back: `Model Intent: "..."`.
+  4. **Actionable Guidance**: Contextual guidance directing the model to non-destructive inspection (dry-run, explain) or requiring explicit user confirmation instead of repeating the denied action.
+  5. **Breaker Status Notice**: When the circuit breaker is tripped, injects the prominent warning requiring user guidance before automated retries resume.
+
+
 

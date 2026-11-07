@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.40] - 2026-11-07
+
+### Persistence & Storage
+- **Official DSH `storageDomain` Integration (#233)**: Conformed persistent session mapping to official DSH `storageDomain.open(spec)` contract using `SHADOW_AUDITOR_DOMAIN_SPEC` (`dsh_shadow_auditor` domain with `sessions` table and value schema parsing), ensuring full compatibility across DSH 0.2.1-rc.4 and 0.2.2-rc.1.
+- **Dual Table & KV Store Facet Support (#233)**: Updated `DomainStorageAdapter` in `lib/mask/store.js` to support both structured table access (`domain.table('sessions').get/put/delete`) and legacy/mock key-value operations (`domain.get/set/delete`).
+- **Dynamic Cordis Injection Upgrade (#233)**: Replaced premature synchronous fallback check with dynamic Cordis service listener `ctx.inject(['storageDomain'], ...)` and `StripperRegistry.setStorageAdapter()`, smoothly migrating active in-memory sessions to persistent storage when `storageDomain` resolves asynchronously.
+- **Silent Diagnostic In-Memory Fallback (#233)**: Eliminated unconditional `logger.info` startup warning in `lib/index.js` caused by async race condition during plugin boot; downgraded fallback diagnostics strictly to `logger.debug` to keep harness production journals clean.
+- **State Restoration & Process Restart Resiliency (#233)**: Guaranteed session-scoped demasking tables persist across harness restarts and remain isolated from telemetry logs.
+
 ## [0.2.39] - 2026-11-06
 
 ### Config & Extensibility

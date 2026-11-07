@@ -264,9 +264,11 @@
 - Matches from multi-pattern detection passes are sorted by `start` offset (ascending), followed by `score` (descending), and span length (descending).
 - Overlapping intervals are safely resolved by discarding colliding lower-priority/lower-score matches, preserving text integrity.
 
-### 19.5 Persistent Storage Domain Integration (`storageDomain`) (#132, #133, #134)
-- Session restoration mappings are persisted via DSH `ctx.storageDomain` under the `'dsh_shadow_auditor'` namespace when available (#132).
-- When `storageDomain` is absent, automatically degrades to transient in-memory storage with a single non-intrusive diagnostic log (#133).
+### 19.5 Persistent Storage Domain Integration (`storageDomain`) (#132, #133, #134, #233)
+- Session restoration mappings are persisted via DSH `ctx.storageDomain` under the `'dsh_shadow_auditor'` namespace and `'sessions'` table when available (#132, #233).
+- Uses official DSH `storageDomain.open(spec)` contract supporting both table-level KV APIs (`domain.table('sessions')`) and legacy/mock KV interfaces (#233).
+- Dynamically binds via Cordis `ctx.inject(['storageDomain'], ...)` to upgrade in-memory sessions without loss when `storageDomain` resolves asynchronously (#233).
+- When `storageDomain` is absent, degrades smoothly to transient in-memory storage with diagnostic logging restricted to `debug` level, eliminating spurious startup warnings in production journals (#133, #233).
 - Lifecycle cleanup tracking (`domainPromise`) prevents unhandled rejections and resource leaks during rapid plugin unloads (#134).
 
 ### 19.6 Session Log Cleanliness Invariant (#135)

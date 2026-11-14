@@ -389,6 +389,21 @@ graph TD
 - **Deduplication & Order Preservation**: Merged items preserve the order of their first appearance without duplicate entries.
 - **Integrated Config Surfaces**: `resolveConfig` automatically applies `expandDefaults` across `rules`, `ignoredPatterns`, `customBlockedCommands`, and `sensitivePathPatterns`.
 
+## 25. Release Artifact & Package Hygiene (#237)
+
+### 25.1 Zero Stray Tarballs in Source Root
+- Release archives (`*.tgz`) must never be placed or left in the source checkout root.
+- Automated release packing targets external cache (`/mnt/external/Project/DEV/.artifacts-cache/` or `--pack-destination /tmp`).
+- `scripts/clean-pack.mjs` executes automatically during `prepack` to sanitize accidental build junk (`.tgz`, `.tar`, `.tmp`, `.bak`).
+
+### 25.2 Automated Package Size & Integrity Gate (`scripts/pack-check.mjs`)
+- Executed on every `npm test` run before unit test suite execution.
+- Enforces hard block limit: no file within the distributed tarball may exceed 262,144 bytes (`BLOCK_LIMIT`).
+- Enforces warning threshold at 250 KB (`WARN_LIMIT`).
+- Fails the test suite immediately if any `.tgz` exists in the repository root.
+
+
+
 
 
 

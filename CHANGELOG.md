@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.41] - 2026-11-14
+
+### Web UI & Accessibility
+- **Design Platform Theme Tokens Conformance (#236)**: Replaced non-existent `--dsw-alias-state-brand-primary` with canonical `--dsw-alias-state-business-primary` across `.sa-input:focus`, `.sa-textarea:focus`, `.sa-card-header-btn:focus-visible`, and diff inspector remediations, restoring visual focus visibility in dark and light themes.
+- **Hardcoded Color Literal Elimination (#236)**: Removed hardcoded `#1677ff` focus outline fallback; replaced invalid `--dsw-alias-shadow-l2` with standard CSS `color-mix` elevation; standardized warn states to `--dsw-alias-state-warn-primary` and hover to `--dsw-alias-interactive-bg-hover`.
+- **Theme Token Guard Test (#236)**: Added `test/theme-tokens-guard.test.mjs` verifying all `--dsw-*` tokens in `lib/client.js` against canonical `@deepseek-ai/dsh-client-ui-theme` definitions.
+
+### Release Hygiene & Packaging
+- **Root Artifact Guard & Prepack Cleaner (#237)**: Added `scripts/pack-check.mjs` and `scripts/clean-pack.mjs` to permanently prevent `.tgz` release tarball regressions in the source repository root.
+- **Automated Size Limit Verification (#237)**: Integrated pack check into `npm test` verifying file sizes stay within the 262,144-byte limit. Documented release hygiene rules in `docs/design/DESIGN.md`.
+
+### Security & Dependencies
+- **Vulnerability Remediation (`npm audit`) (#238)**: Upgraded transitive dependencies `zod` (4.6.5 -> 4.6.7, resolving GHSA-mrhx-c7xc-m3w5) and `fast-uri` (3.1.8 -> 3.1.9, resolving GHSA-w74x-v6f9-j3xg), achieving 0 vulnerabilities on `npm audit --omit=dev` with zero changes to peer-dependency contracts.
+
 ## [0.2.40] - 2026-11-07
 
 ### Persistence & Storage
